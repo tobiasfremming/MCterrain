@@ -137,3 +137,5 @@ ProjectSettings/ShaderGraphSettings.asset
 
 # Temporary files
 *
+# local backups
+.git_old_*
