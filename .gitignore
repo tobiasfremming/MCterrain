@@ -24,3 +24,14 @@ Thumbs.db
 
 # local backups
 .git_old_*
+
+# Unity caches / local backups
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+UserSettings/
+.git_old_*
