@@ -21,3 +21,6 @@ Thumbs.db
 
 # local backups
 .git_old_*
+
+# local backups
+.git_old_*
