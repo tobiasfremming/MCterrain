@@ -38,6 +38,6 @@ MonoBehaviour:
   seaLevel: 0
   slopeThresholds: {x: 0.35, y: 0.6}
   triplanarScale: 1
-  defaultDensity: {fileID: 0}
+  defaultDensity: {fileID: 11400000, guid: 432480f535a34b8ea68b20c2d8c548b3, type: 2}
   showChunkBounds: 1
   configVersion: 1
