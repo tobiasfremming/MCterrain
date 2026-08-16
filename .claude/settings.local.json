@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(python -c \"import pypdf; print\\('pypdf ok'\\)\")",
+      "Bash(python -c \"import fitz; print\\('fitz ok'\\)\")",
+      "Bash(python *)",
+      "WebSearch",
+      "WebFetch(domain:www.shadertoy.com)",
+      "Bash(dotnet run *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(kill -9 18502)",
+      "Bash(/c/Users/tobia/conda/miniconda3/python *)"
+    ]
+  }
+}

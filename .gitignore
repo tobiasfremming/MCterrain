@@ -135,7 +135,5 @@ ProjectSettings/ShaderGraphSettings.asset
 # Mono crash dumps
 *.blob
 
-# Temporary files
-*
 # local backups
 .git_old_*
