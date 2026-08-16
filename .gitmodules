@@ -1,0 +1,3 @@
+[submodule "Assets/TerrainGen"]
+	path = Assets/TerrainGen
+	url = https://github.com/tobiasfremming/mc-terrain-gen.git
