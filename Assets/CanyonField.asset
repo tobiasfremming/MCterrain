@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isoLevel: 0
   seed: 777
-  floorHeight: 2
-  thScale: 900
+  floorHeight: 2.51
+  thScale: 926.2
   thLo: 0.47
   thHi: 0.52
   peakScale: 420

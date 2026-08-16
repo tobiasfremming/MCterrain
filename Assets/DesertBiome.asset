@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b3fbd777630b4533bc0bdbd0291ce18b, type: 3}
   m_Name: DesertBiome
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   displayName: Desert
   terrain: {fileID: 11400000, guid: 432480f535a34b8ea68b20c2d8c548b3, type: 2}
-  bias: 0
+  bias: 0.4
   hardness: 0.05
   colorFlat: {r: 0.83, g: 0.55, b: 0.26, a: 1}
   colorSteep: {r: 0.68, g: 0.4, b: 0.17, a: 1}

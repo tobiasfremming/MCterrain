@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b3fbd777630b4533bc0bdbd0291ce18b, type: 3}
   m_Name: CanyonBiome
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   displayName: Canyon
   terrain: {fileID: 11400000, guid: 38e6df7878c0418d98448edeb705b1d0, type: 2}
-  bias: 0
+  bias: 0.4
   hardness: 0.92
   colorFlat: {r: 0.84, g: 0.58, b: 0.34, a: 1}
   colorSteep: {r: 0.6, g: 0.35, b: 0.22, a: 1}
