@@ -15,5 +15,9 @@
       "Bash(gh auth *)",
       "Read(//c/Users/tobia/AppData/Local/Temp/claude/C--Users-tobia-Documents-unity-stuff-MarchingCubes/545c1521-d804-42ae-ae48-fecf228dd245/scratchpad/verify-clone/Prefabs/**)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "unityMCP",
+    "blender"
+  ]
 }

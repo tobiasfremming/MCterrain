@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__unityMCP__read_console",
+      "mcp__unityMCP__manage_scene",
+      "mcp__unityMCP__manage_asset",
+      "mcp__unityMCP__find_in_file",
+      "mcp__unityMCP__validate_script",
+      "mcp__unityMCP__manage_camera",
+      "mcp__unityMCP__manage_script_capabilities"
+    ]
+  }
+}

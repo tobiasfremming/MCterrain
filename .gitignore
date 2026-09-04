@@ -137,3 +137,7 @@ ProjectSettings/ShaderGraphSettings.asset
 
 # local backups
 .git_old_*
+
+# Claude Code: project MCP wiring is committed (.mcp.json, .claude/settings.json),
+# but each developer approves servers on their own machine.
+.claude/settings.local.json
