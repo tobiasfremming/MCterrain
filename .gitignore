@@ -141,3 +141,7 @@ ProjectSettings/ShaderGraphSettings.asset
 # Claude Code: project MCP wiring is committed (.mcp.json, .claude/settings.json),
 # but each developer approves servers on their own machine.
 .claude/settings.local.json
+
+# Unity crash-recovery scene snapshots: ~1.7 GB of baked terrain chunks,
+# every one a subset of Scenes/SampleScene.unity. Never useful in the repo.
+Assets/_Recovery/
