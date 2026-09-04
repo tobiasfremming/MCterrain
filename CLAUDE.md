@@ -7,15 +7,20 @@
 
 | | |
 |---|---|
-| `unityMCP` | HTTP, `http://localhost:8081/mcp`. Started by the Editor, not by Claude. |
+| `unityMCP` | HTTP, `http://localhost:8082/mcp`. Started by the Editor, not by Claude. |
 | `blender` | stdio, `uvx blender-mcp`. Needs the BlenderMCP panel connected. |
 
-**Port 8081 is deliberate, not a default.** The `spaceGame/SpaceGame` project
-runs its own MCP-for-Unity server on **8080**. Both Editors are often open at
-once, and a server on 8080 here would answer with *that* project's scene — the
-failure looks like a stale domain, not a misconfiguration. If a tool result
-mentions the wrong project, check `Application.dataPath` before debugging
-anything else.
+**Port 8082 is deliberate, not a default.** The `spaceGame/SpaceGame` project
+also runs an MCP-for-Unity server, and it does NOT reliably stay on 8080 — it
+has taken 8081 before. Both Editors are often open at once, and a server on a
+port this project also uses answers with *that* project's scene: the failure
+looks like a stale domain, not a misconfiguration.
+
+**A port is not an identity. Verify the instance, not the port.** Before acting
+on anything from `unityMCP`, read `mcpforunity://instances` and confirm it says
+`MarchingCubes@…` on Unity 6000.2.6f2. A tool result naming a path outside
+`Assets/{TerrainGen,Scenes,_Recovery}` means you are in the wrong project — stop
+and re-check rather than believing the result.
 
 **Do not click "Register with Claude Code"** in the MCP For Unity window. It
 writes a second entry named `UnityMCP` into `~/.claude.json`, and every
