@@ -59,23 +59,28 @@ grammar text ──parse──▶ LSystemGrammar ──rewrite(seed)──▶ wo
 3. **Terminate by parameter, one generation early.** `A(l,w) : l < MIN -> F(l)
    K` plus `#iterations` = steps-to-threshold + 1. Count leftover apex symbols
    after deriving; it must be zero, or they become stray markers.
-4. **Randomise everything that can vary**, with guards on every variant:
+4. **Draw per-plant parameters once, in the first rule, and thread them
+   through the modules.** `X -> T(rand(2,5), rand(30,50), rand(0.77,0.81))`
+   gives each seed its own trunk height, fork angle and shrink rate; the
+   `#define` is only for what never varies. Counts drawn this way need
+   `#iterations` sized for their *maximum*, and a check across eight seeds.
+5. **Randomise everything that can vary**, with guards on every variant:
    angles `+(a + rand(-8, 8))`, lengths `l * rand(0.85, 1.05)`, and weighted
    alternatives `A(l,w) : l >= MIN : 0.7 -> …` / `: 0.3 -> …`. A deterministic
    grammar bakes eight identical variants; the first fern did exactly that.
-5. **Golden angle between siblings**: `/(137.5)` (or `/(137.5 + rand(-10,10))`)
+6. **Golden angle between siblings**: `/(137.5)` (or `/(137.5 + rand(-10,10))`)
    keeps successive branches out of one plane. It is the single cheapest
    realism win. Roll (`/ \`) after every branch, pitch (`& ^`) for droop.
-6. **Tropism** (bend toward a direction) is a small pitch per segment:
+7. **Tropism** (bend toward a direction) is a small pitch per segment:
    gravity droop `&(ARCH)` on ferns and willow, phototropism `^(k)` on
    saplings. Accumulated over 15–20 segments it *is* the silhouette.
-7. **Apical dominance**: the main apex keeps a longer step and larger width
+8. **Apical dominance**: the main apex keeps a longer step and larger width
    than laterals (`A(l*0.95, w*0.9)` vs `B(l*0.7, w*0.6)`), and laterals
    start at a wider angle that relaxes with age.
-8. **Width follows the pipe model**: at a fork, children's widths satisfy
+9. **Width follows the pipe model**: at a fork, children's widths satisfy
    `w_parent^n = Σ w_child^n` with `n ≈ 2–3`. Cheap version: `TP ≈ 0.7` per
    split on both children.
-9. **Leaves go where twigs end**: emit `L(size)` markers on terminal rules and
+10. **Leaves go where twigs end**: emit `L(size)` markers on terminal rules and
    optionally along the last segments; size by parameter so `PlantProfile` can
    read it (`sizeFrom = MarkerParam`).
 
@@ -118,9 +123,11 @@ card (`vegetation-scatter` skill).
 | Runaway word / truncated | exponential rule with too many iterations; check `Truncated` |
 | Grammar edits do nothing in play | prototypes are baked; rebake |
 | Different plant each run | `UnityEngine.Random` sneaked in; use the rewriter's seeded stream |
+| Capsule, cone or cylinder part lies *across* its stem | part frames are the turtle's (+Z heading, +Y up) and primitives are built along +Y; set `eulerOffset` x=90 (along) or -90 (against, e.g. a funnel) |
+| Emissive parts render pure white | over-bright emission clips without tonemapping; `MarchingCubes/Plant` clamps to the albedo's hue, keep `_EmissionStrength` ≈ 1.6 |
 
 ## Report
 
 Name the architecture chosen, the grammar file, how many iterations and why,
-the LOD0 triangle count per variant, and which of the eight rules above you
+the LOD0 triangle count per variant, and which of the ten rules above you
 skipped and why.
