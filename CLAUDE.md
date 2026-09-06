@@ -7,10 +7,10 @@
 
 | | |
 |---|---|
-| `unityMCP` | HTTP, `http://localhost:8082/mcp`. Started by the Editor, not by Claude. |
+| `unityMCP` | HTTP, `http://localhost:8080/mcp`. Started by the Editor, not by Claude. |
 | `blender` | stdio, `uvx blender-mcp`. Needs the BlenderMCP panel connected. |
 
-**Port 8082 is deliberate, not a default.** The `spaceGame/SpaceGame` project
+**Port 8080 is deliberate, not a default.** The `spaceGame/SpaceGame` project
 also runs an MCP-for-Unity server, and it does NOT reliably stay on 8080 — it
 has taken 8081 before. Both Editors are often open at once, and a server on a
 port this project also uses answers with *that* project's scene: the failure
