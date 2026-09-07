@@ -1,8 +1,12 @@
 # Limb and structure recipes
 
 Rule fragments that worked in the flora lab, with the numbers. Symbols are
-single characters; `F`, `G`, `f`, `g` are turtle commands and can never be
-rule names. Parts are centred on their marker, so `f(half)` before a part.
+single characters; `F`, `G`, `f`, `g` are turtle DRAW commands and can never
+be part symbols: a part named `G` is drawn as a stem segment sticking out
+of wherever it was placed (it happened twice: glow-bush clubs, umbrella rim
+balls). Rules named `G` are fine, they are rewritten away before the
+turtle sees them. Parts are centred on their marker, so `f(half)` before a
+part.
 
 ## Crooked limb (the baseline)
 
@@ -35,8 +39,69 @@ A(k,l,w,u) : k > 0 : 0.75 -> !(w*rand(0.85,1.2)) F(l*rand(0.7,1.3)) ^(u*rand(0.7
 Launch out and down (`&(100..120)`), then pitch about the stalk's OWN left
 axis every segment with no roll and no `$`: the curve stays in its launch
 plane and passes over the top (u = 13..17 over 14 segments = 180..240
-degrees). `$ ^(u)` always rotates toward the sky and stops at vertical, so
-it can never make an arch; the first cage stood up like a row of posts.
+degrees). `$ ^(u)` always rotates toward the sky, so it can never make an
+arch; the first cage stood up like a row of posts.
+
+## Levelling a cap (umbrella, chanterelle)
+
+`$ ^(u)` does NOT stop at vertical. `$` is a no-op once the heading is
+vertical, and after the heading passes vertical `$` flips local up, so the
+next `^` pitches back: `$ ^(45) $ ^(45) $ ^(45)` leaves a tilt anywhere up
+to 45 degrees and the umbrella's top plates stood on edge. Level in small
+steps with a counting rule, worst tilt = one step:
+
+```
+N(n) : n > 0 -> $ ^(5) N(n-1)
+N(n) : n <= 0 -> $
+...  !(w) F(l*0.3) N(16) C(rand(10,14))     // 16 steps = 80 degrees of range
+```
+
+Budget the steps into `#iterations`.
+
+## Pointing at the ground (curtain cords, cathedral columns)
+
+`$ &(90)` is relative to the limb heading, not the world: off a limb that
+has swept up 45 degrees it points 45 degrees down and BACK toward the
+trunk, and the curtain tree's cords fanned across the crown instead of
+hanging. Same stepped rule, pitching down:
+
+```
+P(n) : n > 0 -> $ &(10) P(n-1)
+P(n) : n <= 0 -> /(rand(360))
+...  A(i,w) : i >= 1 : 0.35 -> [ P(15) D(rand(5,10), rand(0.4,0.6)) ]
+```
+
+15 steps of 10 degrees cover a limb pitched anywhere up to 60 degrees up.
+Hanging things are card strips or cylinder parts placed with `f`, never
+`!(0.03) F`.
+
+## Launching a limb at a world elevation (bonsai)
+
+Off a twisted or leaning trunk, `&(a)` gives an elevation that depends on
+the trunk's tilt, so the same grammar throws one limb at the sky and the
+next at the floor. Point down first, then level up a counted amount:
+
+```
+[ $ +(rand(360)) P(14) N(rand(14,20)) L(...) ]   // azimuth random, elevation -20..+10
+```
+
+`$ +(rand(360))` yaws round the vertical, `P(14)` points down, `N(n)` pitches
+up 5n degrees and stops at vertical. The trunk's tilt drops out. Costs
+P + N iterations per limb; budget them.
+
+## Twisting trunk (bonsai)
+
+Corkscrew = a yaw round the vertical of the same sign every segment, with
+the pitch wandering and a pull back to vertical that grows with height:
+
+```
+T(k,l,w,y,i) : k > 0 -> !(w*rand(0.85,1.25)) F(l*rand(0.7,1.2)) $ +(y*rand(30,55)) &(rand(-12,28)) $ ^(rand(5,12) + i*0.8) T(k-1, l, w*0.90, y, i+1)
+```
+
+`y` is +1 or -1 drawn once per tree, launched leaning 25..35 degrees, one
+segment in four a sharp kink (`/(rand(360)) &(rand(30,50))`), taper 10 % a
+segment. Without the `$` before `+` the yaw is about the local up and the
+spiral collapses into a wobble.
 
 ## Roots (stilt tree, banyan, strider, thicket)
 
@@ -130,5 +195,9 @@ the same grammar gave the red-to-yellow and white-to-lilac shrubs.
 | cap cone scale.y 0.14 | a plate; 0.3 |
 | `&(rand(0,140))` spikes | 1.9 m underground; cap at 100 |
 | `^(a)` yaw after `$` for a helix | tilted circle, 2.5 m instead of 9 |
-| `$ ^(u)` for an arch that must pass over the top | posts: it stops at vertical; pitch in-plane without `$` |
+| `$ ^(u)` for an arch that must pass over the top | posts: it only ever pitches toward the sky; pitch in-plane without `$` |
+| `$ ^(45) $ ^(45) $ ^(45)` to level a cap | plates on edge: overshoots and oscillates; use the 5-degree `N(n)` leveller |
+| `$ &(90)` to hang a cord off a limb | cords point back at the trunk: it is relative to the limb heading; use the 10-degree `P(n)` pointer |
 | aerial roots budgeted from iteration 0 | not terminated, stray `D` markers; count from where the hook fires |
+| a part symbol `G` (rim balls) | drawn as sticks: `G` is a draw command; rename the part |
+| a thin strand as `!(0.03) F(...)` off a thick limb | the stem tapers from limb width to 0.03 in one segment: a big dark cone; use a thin cylinder part |
