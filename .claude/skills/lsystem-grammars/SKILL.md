@@ -18,6 +18,10 @@ Read first, every time, before writing a grammar in this repo:
   iteration early, arity, stochastic guards, `!(w)` *sets* width, `//` vs `/`,
   thread-safety, buffer ownership.
 
+For limbs that must look alive (crooked, gnarled, sweeping, with things
+sprouting along them) go to the `crooked-branches` skill: it holds the
+baseline limb rule and the full concept-to-lab workflow.
+
 Then the references here when the task calls for them:
 
 - `references/techniques.md` — the design vocabulary: parametric, stochastic
@@ -123,6 +127,8 @@ card (`vegetation-scatter` skill).
 | Runaway word / truncated | exponential rule with too many iterations; check `Truncated` |
 | Grammar edits do nothing in play | prototypes are baked; rebake |
 | Different plant each run | `UnityEngine.Random` sneaked in; use the rewriter's seeded stream |
+| A helix that stops rising, or a spiral that flattens | yawing about the turtle's own up tilts the circle; yaw about the WORLD vertical with `$ &(e) +(a) &(-e)` where e is the heading's elevation (verified: constant elevation, 9 m rise over 60 segments) |
+| Parts placed on a cone or dome float or sink | walk the surface from the apex along the slope angle measured from *up* (a cone with radius r and height h: 180 - atan(r/h) degrees), never the slope from the base |
 | Capsule, cone or cylinder part lies *across* its stem | part frames are the turtle's (+Z heading, +Y up) and primitives are built along +Y; set `eulerOffset` x=90 (along) or -90 (against, e.g. a funnel) |
 | Emissive parts render pure white | over-bright emission clips without tonemapping; `MarchingCubes/Plant` clamps to the albedo's hue, keep `_EmissionStrength` ≈ 1.6 |
 
