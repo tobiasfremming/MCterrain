@@ -67,7 +67,7 @@ cover, not for trees. Options, cheapest first:
    the first point from the plot RNG. Cross-plot spacing is not enforced;
    with `r < size/4` the seams are invisible.
 4. **Noise masks**: multiply the expected count by a region-scale fbm (forests
-   vs clearings) or by biome weight (`DensityField.GetVertexColor`), or gate on
+   vs clearings) or by biome weight (`BiomeDensityField.ComputeWeights`), or gate on
    `SurfaceHardness` (no ferns on rock).
 
 ## Filters

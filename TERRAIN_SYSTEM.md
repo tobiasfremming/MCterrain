@@ -297,9 +297,10 @@ A `Biome` asset bundles everything that defines one biome:
   the column via its own `AddDensityColumn` fast path.
 - Negligible weights (< 0.004) are skipped and the rest renormalized — still a
   pure function of position, so all LODs agree exactly.
-- **Vertex colors carry the weights** of biomes 1–3 (R/G/B); the shader
-  cross-fades biome palettes with them, so color transitions exactly track the
-  terrain blend.
+- **Biome identity is never stored per vertex.** The terrain shader and the
+  grass scatter evaluate the same selection from world position
+  (`Shaders/Compute/BiomeSelect.hlsl`, a mirror of `ComputeWeights`), so
+  shading, grass and geometry agree on every boundary. See `BIOME_SHADING.md`.
 
 Live tuning: `OnValidate` on any Biome/field asset fires
 `TerrainTuning.Changed`; the manager streams a full regeneration in play mode.
@@ -324,8 +325,9 @@ Each chunk covers a cube of world space with a fixed cell grid (default 32³).
 5. Optionally a **collision-only mesh** (no normals, no Transvoxel deformation)
    from the physics field (§6).
 
-Vertex colors (biome weights) are baked here too, at the vertex's primary
-position.
+Vertex colour alpha (baked ambient occlusion, one density probe along the
+normal) is computed here too, at the vertex's primary position. RGB is unused;
+biome identity is evaluated from world position by every consumer.
 
 ---
 
@@ -454,7 +456,7 @@ One custom URP shader (`MarchingCubes/Sand Terrain`) drives all terrain:
 - **Sahara palette** sampled from reference photography; ambient is pulled
   warm (`_ShadowWarmth`) because desert shadows bounce orange, never grey.
 - **View-dependent sand**: grazing-angle fresnel sheen + sparse sun glints.
-- **Canyon biome** (blended by vertex color R): warped sediment layers with
+- **Canyon biome** (weighted by the per-pixel biome selection): warped sediment layers with
   sub-layer striations (adapted from the owner's MountainLayers shader),
   sandy floors on flat surfaces.
 - Double-sided with normal flip (cave interiors light correctly), fog-aware.

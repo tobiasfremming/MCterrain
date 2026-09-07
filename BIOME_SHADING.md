@@ -89,39 +89,92 @@ projects it to `normalize(worldPos - center) * radius` itself; do not
 pre-project, and never select from a per-face triplanar coordinate (the
 three faces would disagree).
 
-## Grass: what to change
+## Grass (migrated 2026-09-07)
 
-The grass scatter still reads the old vertex-colour bake, which is why that
-bake has been left in place (marked TRANSITIONAL in the code). With the
-world now holding six biomes, grass currently sees biomes 4 and 5 as biome 0.
-The migration is self-contained:
+The grass scatter is now a consumer of the selection like everything else,
+and the vertex-colour bake is gone.
 
-1. **`Shaders/Compute/GrassScatter.compute`**: include
-   `../Biomes/BiomeSelectGlobals.hlsl` (or `BiomeSelect.hlsl` and read your
-   own parameters) and call `MC_BiomeWeights` at the triangle centroid in
-   world space instead of decoding the vertex colours. The globals are set on
-   the render thread by `Shader.SetGlobal*`, which compute shaders also see.
-   If the scatter runs before the manager has published (first frame), call
-   `MCChunkManager.PublishBiomeShadingGlobals(world, planet)` yourself; it is
-   public and static and idempotent.
-2. **`GrassCommon.hlsl` / the 24-byte blade record**: the `weights` word
-   (4 x unorm8) can stay as a per-blade cache of the centroid weights, but it
-   only holds four; either widen it, store the dominant biome index plus its
-   weight, or look the weights up again from the blade root in the grass
-   vertex shader (cheap: root position is already in the record).
-3. **`Scripts/Grass/TerrainGrass.cs` `BuildBiomeParams`** and
-   **`GrassSystem.BiomeParams`**: drop the `Mathf.Min(BiomeCount, 4)` and the
-   `Vector4`-per-property layout; use eight-wide arrays
-   (`SetGlobalFloatArray` / `SetVectorArray`) or a small `ComputeBuffer`.
-   The Dolomite meadow line is already in `_BiomeShadeLines[i].xy`, so the
-   special case there can read the table instead of the field.
-4. **Then delete the bake**: `BiomeDensityField.HasVertexColors`,
-   `GetVertexColor`, `GetVertexColorWithWeights`, `PlanetField.GetVertexColor`,
-   the `GetVertexColor` call in `ChunkMesher.VertexColorWithAO` (write
-   `Color(0, 0, 0, ao)`), and the per-vertex `MC_ComputeBiomeWeights3D` /
-   weights write in `TerrainMesh.compute`. Keep the colour stream itself:
-   `.a` is the baked AO and the 40-byte vertex layout does not change.
-   CPU meshing loses one softmax per vertex.
+- **`Shaders/Compute/GrassScatter.compute`** includes
+  `../Biomes/BiomeSelectGlobals.hlsl` and calls `MC_BiomeWeights` at the
+  triangle centroid (world space) inside `EvaluateTriangle`. Vertex colour is
+  read for AO (`.a`) only. Its own per-biome table is three eight-wide
+  compute arrays set per scatter by `GrassSystem.Scatter`:
+  `_GrassBiome[i]` (x blades/m², y local height where grass stops with the
+  radius already added, z fade metres), `_GrassBase[i]`, `_GrassTip[i]`,
+  plus `_GrassUseBiomes` (0 for worlds without a `BiomeDensityField` and for
+  `GrassLab`: slot 0 applies everywhere and the `_BiomeSel*` globals are not
+  read).
+- **Blade record**: the fourth word is now `colors`, two RGB565 colours
+  (base | tip << 16) blended over the biomes at the centroid weighted by
+  `w[i] * density[i] * heightMask[i]`. `Grass.shader` unpacks them and no
+  longer knows biomes exist; the record stays 24 bytes for any biome count.
+- **`TerrainGrass.BuildBiomeParams`** fills `GrassSystem.BiomeParams`
+  (`table`, `baseColors`, `tipColors`, eight slots, `useBiomeSelect`) from
+  `Biome.grassDensity/grassColorBase/grassColorTip`. Height lines mirror the
+  ground shading from the field assets: Dolomite `baseHeight + meadowLine`,
+  Mountain (`ErodedHeightField`) `baseHeight + grassLine`, radius added. It
+  calls `MCChunkManager.PublishBiomeShadingGlobals(world, planet)` whenever
+  its parameter hash changes, so the globals exist before the first scatter.
+- **Deleted**: `DensityField.HasVertexColors/GetVertexColor` and every
+  override (`BiomeDensityField`, `PlanetField`, `ModifiedDensityField`),
+  `GetVertexColorWithWeights`, the weight bake in
+  `ChunkMesher.VertexColorWithAO` and `TerrainMesh.compute`'s
+  `MC_VertexColor`. Both now write `(0, 0, 0, ao)`. The 40-byte vertex layout
+  is unchanged.
+
+## Border heights (relief fade)
+
+Selection is a softmax with sharpness ~150, so a boundary is only ~20 m wide;
+blending a 240 m mountain into a dune plain over 20 m is a cliff. Lowering
+sharpness would cross-fade two mountain ranges into mush instead, so the fix
+is separate from the weights: every biome's terrain fades toward a flat plane
+at `BiomeDensityField.edgeHeight` as its *lead* in raw selection score over
+the runner-up drops below `edgeBand` (0.2 score units, roughly 60-80 m per
+side at regionScale 1000). At the border the lead is 0 and both sides sit at
+`edgeHeight`; inside a region the lead is large and the terrain is untouched.
+Borders therefore become lowlands (valley floors, sand flats, meadows), which
+is also what real biome boundaries tend to be.
+
+- CPU: `BiomeDensityField.ComputeWeights(x, z, w, relief, n)` /
+  `ComputeWeights3D(pos, w, relief, n)` return the factors;
+  `SampleWithWeights(p, w, relief, n, fw)` and `SampleGrid` apply
+  `r * D_i + (1 - r) * (edgeHeight - y)` per biome before weighting.
+- GPU: `MC_BiomeWeightsFlatRelief` / `MC_BiomeWeightsSphereRelief` in
+  `BiomeSelect.hlsl` (parameter `BiomeSelectParams.edgeBand`, published in
+  `_BiomeSelFlags.y`); `EvaluateBiomeBlendWithRelief` in
+  `DensityBiomeBlend.hlsl`; `BiomeBlendParams` gained `edgeHeight`, `edgeBand`.
+- Shading and grass ignore the relief factor: they only need the weights.
+- Set `edgeBand` to 0 on the `BiomeWorld` asset to turn it off.
+
+## Eroded Dolomites
+
+`Config/DolomiteBiome` now points at `Config/DolomiteErodedField`, an
+`ErodedHeightField` in `baseMode = Massif`: meadow floor, scree apron, sheer
+warped wall and summit crests built with analytic derivatives, run through
+the erosion filter (60 m couloirs, 5 octaves) with the fade target at 0
+except toward the summits and the erosion masked out on the meadow
+(`erosionOnsetRelief`). The Dolomite surface style is unchanged; its
+meadow/rock line is the field's `grassLine`, which the grass reads too. The
+old `DolomiteVolumeField` class and `Config/DolomiteField` asset remain,
+unreferenced.
+
+## Test scenes
+
+`Assets/Scenes/Biomes/<Biome>.unity`, one per biome (Desert, DesertMountains,
+Frost, Mountains, Canyon, Dolomites, Alien, Grove). Each is the SampleScene's
+world objects pointed at `Config/Test/<Biome>WorldConfig`, a flat-world config
+whose `defaultDensity` is `Config/Test/<Biome>World`, a `BiomeWorld` holding
+only that biome. Press Play: the terrain streams around the origin, the
+player drops onto the surface, plants and grass run as usual. To test on the
+planet instead, tick `useGlobe` on that test config and give it a
+`PlanetField` whose `surface` is the single-biome world.
+
+The scenes are generated, not hand-edited: `Marching Cubes / Rebuild Biome
+Test Scenes` (Assets/TerrainGen/Editor/BiomeTestScenes.cs) rebuilds all of
+them from whatever the open SampleScene currently contains, remapping the
+copied objects' references onto each other and setting every `worldConfig`
+field. Add a biome = add a `<Name>WorldConfig` + `<Name>World` pair under
+Config/Test and rebuild.
 
 ## Gotchas
 

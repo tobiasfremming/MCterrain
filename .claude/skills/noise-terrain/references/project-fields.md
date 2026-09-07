@@ -14,7 +14,7 @@ Code lives in `Assets/TerrainGen/Scripts/Terrain/` (a git submodule at
 | `TryGetEmptySkip(min, max)` | override for non-Y "up" (planets) |
 | `GpuType` / `ToGpuLeafParams` | required for any biome member, or the whole world meshes on CPU |
 | `AddDensityColumn` | override to cache per-(x,z) work; this is how 3D fields stay fast |
-| `HasVertexColors` / `GetVertexColor` | biome weights for the shader; pure function of position |
+| (biome weights) | not a field method any more: `BiomeDensityField.ComputeWeights` on the CPU, `BiomeSelect.hlsl` on the GPU, evaluated from world position by every consumer (BIOME_SHADING.md) |
 | `SurfaceHardness` | 0 soft (footprints) .. 1 rock |
 
 Base classes: `HeightDensityField` (column-optimised 2D height + optional
@@ -29,9 +29,13 @@ classifier for sheer walls + spires + explicit arch primitives),
 `LSystemGroveField` (grammar-grown spires as capsule SDFs, CPU atlas + GPU
 evaluation), `ErodedHeightField` (fbm base with analytic derivatives run
 through `ErosionNoise.Filter`, Rune Johansen's erosion filter -- one class,
-two assets: MountainField and DesertMountainField differ only in
-`ErosionParams`, base relief and sand fill; add a landform with erosion by
-making a third asset, not a third class). Read the one closest to what you are building before writing a
+three assets: MountainField and DesertMountainField use the Fbm base and
+differ in `ErosionParams` and sand fill; DolomiteErodedField uses
+`BaseMode.Massif`, a differentiable meadow/apron/wall/crest base. Add a
+landform with erosion by making another asset or another base mode with an
+analytic gradient, not another class). Biome borders: `BiomeDensityField.
+edgeHeight/edgeBand` fade every biome's terrain to a flat plane where its
+selection lead is small, so neighbours meet without a step. Read the one closest to what you are building before writing a
 new one; the shape of the problem repeats.
 
 ## Noise primitives (`TerrainNoise`)
