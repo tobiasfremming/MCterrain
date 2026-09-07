@@ -47,7 +47,49 @@ runs before the ground search because it is a hundred times cheaper.
 `PlantRarity` presets fill `perPlot`/`plotChance` on validation: common
 8 @ 0.85, uncommon 3 @ 0.5, rare 1 @ 0.25, landmark 1 @ 0.04 (and mesh LOD
 off). Landmark is the tier for hero assets over the 20k triangle budget:
-bake them with 3 variants, cull at 900 m, impostor from 150 m.
+bake them with 3 variants, cull at 900 m, impostor from 150 m. The presets
+only drive the uniform fallback; a biome with a colony grammar ignores them.
+
+## Colonies: structure instead of uniform scatter
+
+The authoring side (writing a colony grammar, letter tables, plausibility per
+biome, the offline simulator) is the `plant-colonies` skill; this section is
+the placement contract only.
+
+Uniform scatter in a 24 m square has no structure below the plot and none
+above it, and it looked like noise. Where a `Biome` (or the `PlantWorld`)
+sets a `colony` grammar, placement is three layers, all still pure
+functions of (world, plot id):
+
+1. **Cover mask** (`coverScale`, `coverThreshold`, `coverSoftness` on the
+   Biome): world-anchored fbm at ~140 m, thresholded with a soft edge, gates
+   every candidate. Glades and thickets that run across plot edges, one
+   noise sample per candidate, taken before the ground search.
+2. **Colony grammar**: a 2D L-system (`+ - f [ ]` and markers only; no
+   pitch, roll or `F`) walked in the ground plane once per plot with
+   `colonyChance`, seeded from the plot hash. Markers are species letters
+   (`PlantSpecies.symbol`, never `F G f g`), the parameter is a scale
+   multiplier; several species may share a letter and the marker picks one.
+   A plot also walks its eight neighbours' colonies and keeps the markers
+   that land inside it, so a stand across a plot edge is whole from both
+   sides. Grammars live in `Config/Flora/*ColonyGrammar.asset`; the
+   generator with all five is the session's `gen_colonies.py` pattern:
+   an axiom that picks a colony KIND by probability (grove / vein / ring /
+   thicket / hero / nothing), each kind a small rule with `f(rand(a,b))`
+   offsets. The offline simulator (`ColonySim.cs` against
+   `TerrainGen.LSystem.dll` with a 2D turtle) renders a map of a 14x14 plot
+   grid in seconds; use it before the Editor.
+3. **Spacing** (`PlantSpecies.minSpacing`): candidates are taken largest
+   spacing first and dropped when closer to an accepted plant than the
+   SMALLER of the two spacings (the larger killed every moss-at-a-tree's-foot
+   the grammars asked for). Trees 4 m, shrubs 1.8, ground cover 0.8,
+   landmarks 40. Affinity is the grammar's job; exclusion is this.
+
+Numbers from the simulator with the mask on: 1.5 (desert) to 3.2 (dolomite)
+plants per plot against ~35 for the uniform version, roughly 45 % of
+candidates lost to glades and 15 % to spacing. Hero kinds at 2–4 % of
+colonies gave one landmark per ~250 m; at 5–15 % they were a landmark every
+100 m, which is far too many 40k-triangle plants.
 
 ## Rules
 

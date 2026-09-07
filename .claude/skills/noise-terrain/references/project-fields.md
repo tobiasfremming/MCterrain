@@ -27,7 +27,11 @@ superimposed systems), `CanyonVolumeField` (ridged massifs + narrow smoothstep
 classifier for sheer walls + spires + explicit arch primitives),
 `FrostVolumeField`, `AlienVolumeField` (sin/cos lattice + gorges),
 `LSystemGroveField` (grammar-grown spires as capsule SDFs, CPU atlas + GPU
-evaluation). Read the one closest to what you are building before writing a
+evaluation), `ErodedHeightField` (fbm base with analytic derivatives run
+through `ErosionNoise.Filter`, Rune Johansen's erosion filter -- one class,
+two assets: MountainField and DesertMountainField differ only in
+`ErosionParams`, base relief and sand fill; add a landform with erosion by
+making a third asset, not a third class). Read the one closest to what you are building before writing a
 new one; the shape of the problem repeats.
 
 ## Noise primitives (`TerrainNoise`)
@@ -36,7 +40,8 @@ Seeded integer-hash gradient noise with a 32-direction LUT (`GNoise`, 2D),
 `VNoise3`/`Fbm3` (3D, IQ-style corner hash, cubic fade, amplitudes
 0.5/0.25/0.125, frequency ×2.02), `RidgedFbm` (Musgrave feedback form),
 `DetailFade(fw, featureSize)` for band-limiting, `Hash(ix, iy, seed)` for
-cell decisions. Never `Mathf.PerlinNoise` (not seedable, not mirrored on GPU).
+cell decisions, `GNoiseD`/`FbmD` (same values with analytic d/dx, d/dy --
+what the erosion filter steers by). Never `Mathf.PerlinNoise` (not seedable, not mirrored on GPU).
 Every primitive has a twin in `Shaders/Compute/TerrainNoiseGPU.hlsl`; keep
 them equal to ~1e-4 and keep `MC_FADE_START/END` in lockstep with
 `kFadeStart/kFadeEnd`.

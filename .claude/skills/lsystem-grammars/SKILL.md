@@ -104,6 +104,10 @@ card (`vegetation-scatter` skill).
 
 ## Beyond plants
 
+- **Where plants stand**: a 2D grammar walked over the ground (`+ - f [ ]`
+  and species letters) places groves, veins and rings per plot; that is the
+  `plant-colonies` skill, with its own simulator.
+
 - **Caves and tunnels**: grammar → skeleton → capsule SDFs unioned into a
   `ModifiedDensityField` (subtract) or a field of its own (add, as the grove
   does). The grove field is the reference: plots keyed by hash, structures
