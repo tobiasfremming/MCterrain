@@ -53,8 +53,8 @@ float4 _BiomeSelFlags;            // x 1 = planet mode, 0 = flat
 float4 _BiomeSelBias0, _BiomeSelBias1;   // Biome.bias for slots 0..3, 4..7 (-10 for an empty slot)
 
 float4 _BiomeShadeA[8];           // x Biome.SurfaceStyle, y Biome.blendSharpness, z Biome.hardness
-float4 _BiomeShadeFlat[8];        // Biome.colorFlat, LINEAR (converted at upload by MCChunkManager.ShadingColor)
-float4 _BiomeShadeSteep[8];       // Biome.colorSteep, LINEAR
+float4 _BiomeShadeFlat[8];        // Biome.colorFlat
+float4 _BiomeShadeSteep[8];       // Biome.colorSteep
 float4 _BiomeShadeLines[8];       // style-specific height lines, planet radius ALREADY ADDED:
                                   //   Dolomite:       x rock line, y rock line blend
                                   //   Mountain:       x snow line, y snow blend, z grass line, w grass blend
@@ -106,9 +106,8 @@ and the vertex-colour bake is gone.
   read).
 - **Blade record**: the fourth word is now `colors`, two RGB565 colours
   (base | tip << 16) blended over the biomes at the centroid weighted by
-  `w[i] * density[i] * heightMask[i]`. The record holds sRGB (8-bit-ish
-  565 would crush dark greens if linear); `Grass.shader` unpacks them, decodes
-  with `MC_SrgbToLinear` (`Shaders/SrgbColor.hlsl`) and no longer knows biomes exist; the record stays 24 bytes for any biome count.
+  `w[i] * density[i] * heightMask[i]`. `Grass.shader` unpacks them and no
+  longer knows biomes exist; the record stays 24 bytes for any biome count.
 - **`TerrainGrass.BuildBiomeParams`** fills `GrassSystem.BiomeParams`
   (`table`, `baseColors`, `tipColors`, eight slots, `useBiomeSelect`) from
   `Biome.grassDensity/grassColorBase/grassColorTip`. Height lines mirror the
