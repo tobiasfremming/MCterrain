@@ -14,7 +14,8 @@
 
 Modes: stub (default; everything runs) and `--real-unity` (the real CoreModule: pure math such as
 `ArthropodIKTests` and the octopus solvers run with Unity's own `Mathf`; anything touching a
-`ScriptableObject`, `Mesh` or `Object.name` reports NATIVE - 72 pass, 143 native on 2026-10-18).
+`ScriptableObject`, `Mesh` or `Object.name` reports NATIVE - 94 pass, 227 native on 2026-10-18). The
+renderer's GPU types are harness no-ops in both modes (`Stubs/HarnessRendering.cs`).
 
 Extras: `-p:TG=<tree>` builds against another TerrainGen tree (e.g. a `git archive` of an older commit, to
 tell a regression from a pre-existing failure); `-p:HarnessExtra=<folder>` compiles your scratch `.cs`
