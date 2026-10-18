@@ -9,5 +9,8 @@
       "mcp__unityMCP__manage_camera",
       "mcp__unityMCP__manage_script_capabilities"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
   }
 }

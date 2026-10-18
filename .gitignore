@@ -146,10 +146,5 @@ ProjectSettings/ShaderGraphSettings.asset
 # every one a subset of Scenes/SampleScene.unity. Never useful in the repo.
 Assets/_Recovery/
 
-# Flora prototyping lab. The SYSTEM lives in Assets/TerrainGen/Scripts/Flora and
-# is committed; this scene is just a bench to grow things on, and it churns.
-Assets/Scenes/FloraLab.unity
-Assets/Scenes/FloraLab.unity.meta
-
 # Debug captures.
 Assets/Screenshots/
