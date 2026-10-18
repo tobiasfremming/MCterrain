@@ -54,11 +54,14 @@ its own Octopus*Tests until T1.2/T3.3); legless - Gait.
 
 | test | kind | detail |
 |---|---|---|
-| `CreatureKitTests(WingedSerpent).Gait` | finding | a hind foot at full reach (0.999) is dragged 0.5-5.5 mm while the gait throttle holds the body at 0 in a weaving walk |
-| `CreatureKitTests(WingedSerpent).Size` | finding | stop-go walk (throttle 0 on ~25 % of a straight walk): 0.9x/1.1x distance 6 % apart |
-| `CreatureKitTests(TestHexapod).Size` | finding | stop-go (27 %): 1.4 % apart (test fixture) |
-| `CreatureKitTests(DesertMonitor).MaxBend`, `CreatureMonitorTests.Monitor_MaxBend_NoInvertedTriangles` | offline | one near-zero triangle (-2e-6) |
-| `CreatureMonitorTests.Monitor_TightTurn_LegsClearTheTrunk` | offline | drift at t=3208 of a 60 s wander; also on a7665f2 |
+| `CreatureKitTests(WingedSerpent).Gait` | finding (Unity too) | a hind foot at full reach is dragged while the gait throttle holds the body at 0 in a weaving walk; Unity: weave t=3.60, foot 3 slid 0.574 mm |
+| `CreatureKitTests(TestHexapod).Size` | finding (Unity too) | stop-go walk (27 %): Unity 5.1733 vs 5.3894 (4.2 % apart; 1.4 % offline) - test fixture |
+| `CreatureKitTests(WingedSerpent).Size` | offline only | stop-go chaos: 6 % apart offline, PASSES in Unity (2026-10-18) |
+| `CreatureKitTests(DesertMonitor).MaxBend`, `CreatureMonitorTests.Monitor_MaxBend_NoInvertedTriangles`, `CreatureMonitorTests.Monitor_TightTurn_LegsClearTheTrunk` | offline only | near-zero triangle / wander drift offline; all PASS in Unity (2026-10-18) |
+| `CreatureKitTests(TreeOctopus).MeshTime` | watch | 5.9 and 8.4 ms vs the 5 ms limit in two Unity runs on a busy machine; recheck on a quiet one (Tarantula MeshTime/Perf failed once under load, passed on rerun) |
+
+Unity 2026-10-18: CreatureKitTests 108 run (incl. the Perf cases, which cannot be excluded by group filter), CreatureKitRedTests 4/4, CreatureMonitorTests 12/12.
+
 
 The monitor, beetle and spiders are exactly Froude-similar offline (identical normalised numbers at
 0.8x..1.2x); the stop-go species are not, which is what the Size check exposes.
