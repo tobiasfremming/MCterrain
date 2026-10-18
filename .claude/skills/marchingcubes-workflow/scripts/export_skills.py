@@ -25,6 +25,7 @@ CATEGORY = {
     "isosurface-meshing": ("gamedev", ["marching-cubes", "transvoxel", "voxel", "lod", "unity"]),
     "marchingcubes-workflow": ("gamedev", ["unity", "mcp", "workflow", "marchingcubes"]),
     "creature-module": ("gamedev", ["procedural", "creatures", "animation", "ik", "gpu-skinning", "unity"]),
+    "creature-kit": ("gamedev", ["procedural", "creatures", "composition", "testing", "offline-harness", "unity"]),
 }
 
 
