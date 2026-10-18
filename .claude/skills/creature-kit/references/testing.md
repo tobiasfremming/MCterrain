@@ -5,7 +5,7 @@
 | file | what |
 |---|---|
 | `CreatureHarness.csproj` | globs `Scripts/Creatures/**/*.cs` and the creature tests (`Creature*`, `Arthropod*`, `Octopus*`, `Winged*`, `LegacyLegs*`, `GcAllocs`, `TestFields`) minus two documented lists: `UnityOnlySources`, `UnityOnlyTests` (each with its reason). New files are picked up automatically. Define `CREATURE_HARNESS`. |
-| `Stubs/UnityEngine*.cs` | stubbed engine (default mode). Math is the scratch `legs_impl` harness's, bit for bit, so the offline goldens hold: **add members, never change existing arithmetic**. Rendering stubs make `CreatureRenderer`'s CPU path (skin, bounds) run like `-nographics`. |
+| `Stubs/UnityEngine*.cs` | stubbed engine (default mode). Math is the scratch `legs_impl` harness's, bit for bit, so the offline goldens hold: **add members, never change existing arithmetic**. `Stubs/HarnessRendering.cs` (both modes) makes `CreatureRenderer`'s CPU path (skin, bounds) run like `-nographics`. |
 | `Stubs/HarnessYaml.cs`, `HarnessEditor.cs` | `AssetDatabase.LoadAssetAtPath/FindAssets/GUIDToAssetPath` over the committed `.asset` YAML (Unity serialization rules, unknown keys reported). |
 | `Stubs/UnityOnlyMirrors.cs` | verbatim copies of the few pure statics of excluded files tests reach (`CreatureLab.EnclosureRadius/MaxScale`, `CreatureWorldTests.kMonitorPath`). Keep in sync. |
 | `Stubs/HarnessProfiling.cs` | `Profiling.Recorder` over CoreCLR's exact allocation counter, so the real `GcAllocs.cs` (and its positive control) runs. |
