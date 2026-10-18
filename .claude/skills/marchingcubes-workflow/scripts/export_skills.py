@@ -24,6 +24,7 @@ CATEGORY = {
     "vegetation-scatter": ("gamedev", ["procedural", "vegetation", "instancing", "lod", "unity"]),
     "isosurface-meshing": ("gamedev", ["marching-cubes", "transvoxel", "voxel", "lod", "unity"]),
     "marchingcubes-workflow": ("gamedev", ["unity", "mcp", "workflow", "marchingcubes"]),
+    "creature-module": ("gamedev", ["procedural", "creatures", "animation", "ik", "gpu-skinning", "unity"]),
 }
 
 
