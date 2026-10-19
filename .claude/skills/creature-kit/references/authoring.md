@@ -14,6 +14,8 @@
 4. `creature_kit.py check <Species>` - the 12 generic checks. Fix findings in the data first.
 5. Species-specific tests (copy `CreatureDesertSpeciesTests` / `CreatureSpiderTests`), then the lab.
 
+Heads: Spine bodies have a rigid head by default (`SpineBody.rigidHeadJoints` -1 = auto from the profile's neck, a step >= 5 % narrower in the front half; N overrides, 0 = off). Soft bodies (`SoftBody`, octopus) always deform. General fixes like this become defaults for the body type they suit, not universal rules.
+
 What derives from size: lengths x `sizeScale`, times x sqrt(`sizeScale`), rates / sqrt; accelerations are
 size-invariant (Froude). The kit's `Size` check proves it for the species.
 
