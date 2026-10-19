@@ -5,12 +5,12 @@ description: Create new and exotic animals for the MarchingCubes creature module
 
 # Creature kit
 
-> **Status 2026-10-18: kit in progress.** Phase 0 is in (offline harness, generic kit fixture over the
-> legacy fields, this skeleton). Parts, modules, `CompiledSpecies`, the catalogue and the lab roster come
-> in Phases 1-3 (design `docs/superpowers/specs/2026-10-18-creature-kit-design.md`, plan
-> `docs/superpowers/plans/2026-10-18-creature-kit.md`). **Until Phase 2, author a
-> species with the legacy `CreatureSpecies` fields** (`creature-module` skill, its new-species.md
-> reference) and use this skill for the loop, the harness and the checks.
+> **Status 2026-10-19: kit in progress** on `feat/creature-kit` (design
+> `docs/superpowers/specs/2026-10-18-creature-kit-design.md`, plan `docs/superpowers/plans/2026-10-18-creature-kit.md`).
+> In: harness + generic kit (Phase 0), bone layout (1), parts/modules/`CompiledSpecies`/catalogue (2),
+> part runtimes, mesh emitter, one renderer path, `ModularBrain`, lab roster (3), look-layer table (4,
+> offline; its Unity pixel guard not yet run). Phase 5 (new parts, exotic animals) in progress. Shipped
+> species are still legacy assets behind the adapter (decision 4: convert later, `kit-convert`).
 
 Goal (user): agents make new, exotic animals from reusable components. **Check what exists and reuse it
 first; add a new component type only when nothing fits.** Prototypes live in the Creature Lab. The user
@@ -22,8 +22,8 @@ geometry only; legacy species bit-identical (golden hashes).
 
 ## The loop
 
-1. **Catalogue first.** What parts and behaviours exist, who uses them (Phase 2 generates
-   `Config/Creatures/CATALOGUE.md`; until then: `creature-module` SKILL.md "What exists" and the assets).
+1. **Catalogue first.** What parts and behaviours exist, who uses them, the material-layer registry:
+   `Config/Creatures/CATALOGUE.md` (`creature_kit.py catalogue` says fresh or stale; `--write` regenerates).
 2. **Copy the nearest species** in `Assets/TerrainGen/Config/Creatures/` and edit it (`references/authoring.md`).
 3. **Check offline**: `creature_kit.py check <Species>` until green (`references/testing.md`).
 4. **New component** only if data cannot express it (`references/new-component.md`).
@@ -42,6 +42,8 @@ YAML. Driver: `scripts/creature_kit.py`.
 python .claude/skills/creature-kit/scripts/creature_kit.py check DesertMonitor --tg <worktree>/Assets/TerrainGen
 python .claude/skills/creature-kit/scripts/creature_kit.py test CreatureLegTests LegacyLegsGoldenTests
 python .claude/skills/creature-kit/scripts/creature_kit.py unity-compile      # Scripts + Tests vs real Unity DLLs
+python .claude/skills/creature-kit/scripts/creature_kit.py catalogue --write  # regenerate CATALOGUE.md + catalogue.json
+python .claude/skills/creature-kit/scripts/creature_kit.py kit-convert DesertSnake KitSnake   # legacy -> kit asset
 ```
 
 Offline is not Unity: .NET MathF rounds differently from Mono, so goldens differ per runtime and long or

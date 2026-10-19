@@ -5,6 +5,12 @@
   creature_kit.py test [Class|filter ...]    any harness tests ("CreatureLegTests", "Class.Method", substring)
   creature_kit.py list [filter ...]          the tests the harness would run
   creature_kit.py species                    the species assets the kit discovers (bones, Validate, unknown keys)
+  creature_kit.py catalogue [--write]        Config/Creatures/CATALOGUE.md + catalogue.json: fresh or STALE (exit 1),
+                                             or regenerate them (the same bytes as the Unity menu)
+  creature_kit.py kit-convert <Species> <NewName>
+                                             write Config/Creatures/<NewName>.asset: a legacy species as kit parts +
+                                             modules (kitVersion 1, mirror/pattern sugar); prove it golden-equal
+                                             before replacing the original (design decision 4)
   creature_kit.py unity-compile              compile Scripts + Tests/EditMode against the real Unity DLLs
                                              (C# 9, NUnit, TestRunner): the gate before an Editor visit
 
@@ -153,13 +159,14 @@ def unity_compile(tg):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["check", "test", "list", "species", "unity-compile"])
+    ap.add_argument("command", choices=["check", "test", "list", "species", "catalogue", "kit-convert", "unity-compile"])
     ap.add_argument("names", nargs="*")
     ap.add_argument("--tg")
     ap.add_argument("--real-unity", action="store_true")
     ap.add_argument("--no-build", action="store_true")
     ap.add_argument("-v", action="store_true")
     ap.add_argument("--exclude-category", action="append", default=[])
+    ap.add_argument("--write", action="store_true", help="catalogue: regenerate the files")
     a = ap.parse_args()
     tg = find_tg(a.tg)
     if a.command == "unity-compile":
@@ -167,6 +174,16 @@ def main():
     extra = (["-v"] if a.v else []) + sum((["--exclude-category", c] for c in a.exclude_category), [])
     if a.command == "species":
         sys.exit(run(tg, a.real_unity, ["species"], a.no_build))
+    if a.command == "catalogue":
+        sys.exit(run(tg, a.real_unity, ["catalogue"] + (["--write"] if a.write else []), a.no_build))
+    if a.command == "kit-convert":
+        if len(a.names) != 2:
+            sys.exit("kit-convert: <Species> <NewName> (e.g. kit-convert DesertSnake KitSnake)")
+        rc = run(tg, a.real_unity, ["kit-convert"] + a.names, a.no_build)
+        if rc == 0:
+            print(f"next: a .meta for {a.names[1]}.asset (Unity writes one on import; offline: copy a species .meta "
+                  f"with a fresh guid), then: creature_kit.py check {a.names[1]}")
+        sys.exit(rc)
     if a.command == "list":
         sys.exit(run(tg, a.real_unity, ["list"] + a.names, a.no_build))
     if a.command == "check":
