@@ -72,6 +72,9 @@ New files under `Scripts/Creatures/Kit/` (fewer merge conflicts); namespace `Cre
 
 ## Rules
 
+- Spine bodies have a rigid head by default (`SpineBody.rigidHeadJoints` -1 = auto from the profile's neck,
+  a step >= 5 % narrower in the front half; N overrides, 0 = off). Soft bodies (`SoftBody`, octopus) always
+  deform. General fixes like this become defaults for the body type they suit, not universal rules.
 - Systems, not one virtual call per bone (limbs stay typed arrays inside `CreatureLegs`;
   `Perf_100Lizards` is at its bound).
 - Zero GC per frame, main thread, no new packages; every size-dependent value from `sizeScale`.
