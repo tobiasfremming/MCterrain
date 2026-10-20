@@ -1,7 +1,9 @@
 # The Creature Lab
 
 The lab's animals are `Config/Creatures/CreatureLabRoster.asset` (`CreatureLabRoster`, kit T3.5): one entry
-per enclosure, in arc order, each `{species, scaleOverride}` (0 = the species' own `scale`). `CreatureLab`
+per enclosure, in arc order, each `{species, scaleOverride, count, rocks}` (0 = the species' own `scale`; `count` 0/1 =
+one individual, a group gets consecutive seeds `seed + slot + 1000 + i` spread round a ring; `rocks` = sandstone
+boulders in the enclosure, walked round - RockCrab: 5 crabs, 6 rocks). `CreatureLab`
 reads it (its `species` / `scaleOverrides` arrays are filled from the roster) and places enclosures and
 aviaries; `OctopusLab` takes the first Grove species. No per-type code: the habitat comes from the species.
 

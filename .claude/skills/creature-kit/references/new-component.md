@@ -5,7 +5,33 @@ The kit's contracts are in (Phases 1-4 on `feat/creature-kit`): part/module base
 layout (`CreatureBoneLayout`), mesh emission (`PartMeshEmitter`), part runtimes and locomotion modes
 (`Kit/PartRuntime.cs`), behaviours (`Kit/Brains.cs`), the lab roster (`CreatureLabRoster.asset`) and the
 look-layer table (`Kit/PartLayers.cs`). Worked examples to copy: **FinStrip** (mesh only), **Antenna**
-(runtime with bones), **Shimmer** (a look module), **Layers** (look rows).
+(runtime with bones), **Flapper** (runtime posing its own bones, stage Late), **Tendril** (runtime owning a
+physics chain: it reuses the octopus' `TentacleChain` unchanged, eases its root over its own sub-steps and keeps
+it above the planted feet's ground plane), **Shimmer** (a look module), **Layers** (look rows), **EyeStalk** (a rigid
+part on a bone of its own, rigid to its joint at rest), **Tuck** (a posture: the LAST part, stage Late, blends the
+other parts' bones toward a pose - FK from the IK's coxa per folded ArthropodLeg - and drives the sim's posture
+inputs; Validate enforces "last part").
+
+**Sideways walking** (2026-10-20) is the newest example of such a flag: `Walk.travel Sideways` ->
+`CreatureSpecies.sideways` (needs every SpineBody joint rigid). `CreatureSim` keeps `heading` as the body's forward and
+moves the head along `Travel` (+-right, or forward toward a target within 2 body lengths at `Walk.forwardFactor`); the
+side is chosen by least turn (forward pays 50 deg, the current side keeps 20 deg), a change of side brakes to
+0.1 x top speed first, turns pivot about the girdles' middle, and a target nearer than 0.15 body lengths is not turned
+for (a halted crab spun on a rounding). `CreatureLegs.TravelLocal` aims steps and overshoot along the travel and
+`SideStrideSpeed` caps the speed across the body; `WanderBrain` bears from `sim.Travel`. Shape-side flags of the same
+kind: `LegSegment.flatten` (a flattened leg tube, 0 = round, byte-identical; LimbSpines follow the ellipse) and
+`LoftKey.belly` (a flat underside under a dome, 0 = as deep as the top).
+
+Generic behaviour that lives in a core system goes in as a **data flag, off by default** (every shipped species
+bit-identical, goldens untouched): `CreatureSpecies.waveGait` (set by `Walk.pattern Wave`; `CreatureLegs.StartWave`
+steps the gait groups strictly in turn) and `LimbRole.Folded` (a Wing's arm posed as a feeler on the ground, the
+wing folding on it; `CreatureLegs.Replant` keeps feelers posed) are the Phase 5 examples. The posture inputs on
+`CreatureSim` are the same kind (all off by default): `Scare(intensity)` / `TakeScare()` (a stimulus any behaviour or
+system can raise - the rock crab's Tuck takes it), `Halt` (the brain's target is ignored: it comes to rest), `Asleep`
+(no sub-steps: exactly zero motion; Late runtimes still step so they can wake it), `Crouch` (metres off every joint's
+clearance), plus `Seed` (the individual's spawn seed, for per-individual randomness in runtimes). `RigidLoft.lumpHeight`
+/ `lumpSize` / `lumpSeed` (noise lumps; 0 = smooth, bit-identical) is the shape-side example. A new unit goes at the
+end of `ParamUnit` with its size rule (`Kilograms`: x s^3).
 
 ## First: does something fit?
 
@@ -56,9 +82,14 @@ New files under `Scripts/Creatures/Kit/` (fewer merge conflicts); namespace `Cre
 7. **Look: pick a layer row, not a shader edit.** The shader shades a part id by its row in the species'
    `_PartLayers` table: a **shading model** (Skin, Chitin, Membrane, Eye, Claw) + layers (pattern body /
    limb / none, scale grain normal / fine / none, sheen, shimmer) + a tint (own colour, or a palette
-   colour: Pattern, Band, Dorsal, Belly, Membrane). Either reuse an id (a fin is membrane, 8) or take the
-   next free id (`PartLayers.NextFree`, in the catalogue) and add its row to `PartLayers.Registry`; a
-   species can restyle any row with the `Layers` look module. Colours in a row are sRGB in the asset,
+   colour: Pattern, Band, Dorsal, Belly, Membrane). Either reuse a kind (a fin is `membrane`, 8) or - the
+   table is full, so **never take a new global id** - name a new KIND: add `new Entry(-1, "crest", "use", row)`
+   to `PartLayers.NamedKinds` (or declare `[Part(MaterialKinds = new[] { "crest" })]`) and emit its vertices
+   with `m.Slot("crest")`. Each species that uses it gets a free kit slot of its own (`MaterialSlots`: the lowest
+   of 10..MaxParts-1 the species does not use; legacy kinds keep their ids, so shipped species never change). A
+   species can restyle any row with the `Layers` look module, by `partId` or by `kind` (a kind only that species
+   names is fine: the row is its default). Too many kinds for the free slots is a Validate error, not an overlap.
+   A part with a numeric layer field must name it `...layer...` (the slot scan counts those ids as used). Colours in a row are sRGB in the asset,
    decoded with `.linear` once in C# (`SetVectorArray` does not decode). **A new shading model** is the
    only shader edit: `ShadingModel` + `CreatureLayers.hlsl` + its branch in `Creature.shader`, the CPU
    proof in `CreaturePartLayerTests` and the Unity pixel guard `CreatureShaderLayerTests`. Never reuse
@@ -69,6 +100,34 @@ New files under `Scripts/Creatures/Kit/` (fewer merge conflicts); namespace `Cre
    example species, `creature_kit.py check <Species>` green (the 12 generic checks), regenerate the
    catalogue (`creature_kit.py catalogue --write`; `Catalogue_IsFresh` fails otherwise), the full
    harness suite, `unity-compile`, `compile_check.py`; Unity once.
+
+## Lessons (Phase 5)
+
+- A species restyling rows with `Layers` is a deliberate new look: `CreaturePartLayerTests` checks every
+  species' rows equal the registry except its own `Layers` rows (which must equal the module's), and the
+  legacy-shading CPU proof skips only those ids.
+- Physics chains on a moving root: interpolate the root over the chain's sub-steps and damp relative to the
+  root's velocity (a whole-tick root jump flung the free run, 46 mm/frame), and test the drawn chain
+  (`DisplayX`) for stretch, not the solver's particles. Muscle tone near 1 oscillates (7 Hz): prefer tone
+  0.6-0.7 with damping 5-6 and enough curl to clear the ground.
+- Timed phases (Tuck): run the clocks in Froude time (dt / sqrt s) and snap to a phase end within 1e-4. A phase that
+  is a whole number of frames (0.4 s at 60 fps) otherwise ends a frame apart at 0.9x and 1.1x, and the generic Size
+  check counts the steps that shift (99 vs 97).
+- A pose drawn over the sim (Tuck's folds) leaves the gait alone: the sim keeps its planted feet, only the bones are
+  blended, so Gait stays green. Prove the pose with the skinned mesh (inverted triangles, a silhouette check against the
+  shell: `CreatureTuckTests.ShellExcess`), not with the sim's points.
+- Fold-pose geometry of the wing system is sensitive: scan the parameter (a scratch `HarnessExtra` test calling
+  `KitChecks.MaxBendProblem` over a grid) and pick the middle of a passing region, never a lucky point.
+
+## Phases and the pose sweep (kit services)
+
+A part runtime, locomotion mode or behaviour with discrete phases (a launch, a dive, a curl, a display) implements
+`CreatureKit.IPosePhases` (channel name, phase names, the current phase or -1, which phases are required). The pose
+sweep (check 13) then labels its frames and fails when a required phase is never reached, so the new motion is
+checked for inverted triangles and flipped normals in every phase - not only in MaxBend's walking circle. Shipped
+systems have adapters in `Kit/Services/PosePhases.cs` (no edit to the systems); a new one implements the interface.
+Debug a fold with `creature_kit.py trace <Species> --phase <P> --part <id>` (det < 0 = a mirrored bone) and look with
+`render <Species> --phase <P>`.
 
 ## Rules
 

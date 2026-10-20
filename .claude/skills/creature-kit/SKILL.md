@@ -9,7 +9,8 @@ description: Create new and exotic animals for the MarchingCubes creature module
 > `docs/superpowers/specs/2026-10-18-creature-kit-design.md`, plan `docs/superpowers/plans/2026-10-18-creature-kit.md`).
 > In: harness + generic kit (Phase 0), bone layout (1), parts/modules/`CompiledSpecies`/catalogue (2),
 > part runtimes, mesh emitter, one renderer path, `ModularBrain`, lab roster (3), look-layer table (4,
-> offline; its Unity pixel guard not yet run). Phase 5 (new parts, exotic animals) in progress. Shipped
+> offline; its Unity pixel guard not yet run). Phase 5 (new parts, exotic animals) offline on `feat/kit-animals`:
+> FinnedSandEel, GiantCentipede (Walk.pattern Wave), Hexadrake (LimbRole.Folded), TentacleCrab (Tendril). Shipped
 > species are still legacy assets behind the adapter (decision 4: convert later, `kit-convert`).
 
 Goal (user): agents make new, exotic animals from reusable components. **Check what exists and reuse it
@@ -24,7 +25,7 @@ geometry only; legacy species bit-identical (golden hashes).
 
 1. **Catalogue first.** What parts and behaviours exist, who uses them, the material-layer registry:
    `Config/Creatures/CATALOGUE.md` (`creature_kit.py catalogue` says fresh or stale; `--write` regenerates).
-2. **Copy the nearest species** in `Assets/TerrainGen/Config/Creatures/` and edit it (`references/authoring.md`).
+2. **Start from an archetype** (spiders, crabs: one `ArthropodPlan` part + overrides) or **copy the nearest species** in `Assets/TerrainGen/Config/Creatures/` and edit it (`references/authoring.md`).
 3. **Check offline**: `creature_kit.py check <Species>` until green (`references/testing.md`).
 4. **New component** only if data cannot express it (`references/new-component.md`).
 5. **Lab**: its habitat and enclosure (`references/lab.md`).
@@ -44,7 +45,17 @@ python .claude/skills/creature-kit/scripts/creature_kit.py test CreatureLegTests
 python .claude/skills/creature-kit/scripts/creature_kit.py unity-compile      # Scripts + Tests vs real Unity DLLs
 python .claude/skills/creature-kit/scripts/creature_kit.py catalogue --write  # regenerate CATALOGUE.md + catalogue.json
 python .claude/skills/creature-kit/scripts/creature_kit.py kit-convert DesertSnake KitSnake   # legacy -> kit asset
+python .claude/skills/creature-kit/scripts/creature_kit.py new StoneCrab --from arthropod.crab   # or --from <Species>
+python .claude/skills/creature-kit/scripts/creature_kit.py render Apex --phase launch,glide,touchdown   # the look loop
+python .claude/skills/creature-kit/scripts/creature_kit.py stats Tarantula     # gait / stance / cost numbers
+python .claude/skills/creature-kit/scripts/creature_kit.py trace Apex --phase touchdown --part neck   # bone trace CSV
 ```
+
+Kit services (2026-10-20, feat/kit-services; `references/testing.md`, `references/authoring.md`): checks 13 **PoseSweep**
+(the mesh through every phase the species' own brain and modules reach: launch, beats, glide, stoop, flare, touchdown,
+wing-walk, burrow, tuck, display - inverted triangles, flipped normals, kinks, with phase, part and position) and 14
+**Group** (a roster group of `count` never touches, capsules fitted to the real mesh); `Gait` also checks the drawn feet.
+One YAML library for generators: `scripts/kityaml.py` (never copy a writer again). Groups: `KitGroup` / `Separation`.
 
 Offline is not Unity: .NET MathF rounds differently from Mono, so goldens differ per runtime and long or
 chaotic runs can drift. Known cases are listed in the harness (`kKnown` in `Program.cs`, "offline" vs

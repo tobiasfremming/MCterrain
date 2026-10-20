@@ -13,6 +13,25 @@
                                              before replacing the original (design decision 4)
   creature_kit.py unity-compile              compile Scripts + Tests/EditMode against the real Unity DLLs
                                              (C# 9, NUnit, TestRunner): the gate before an Editor visit
+  creature_kit.py new <Species> --from <Species|archetype> [--gen-dir DIR]
+                                             scaffold Config/Creatures/<Species>.asset (+ .meta, fresh guid) from a
+                                             shipped species (a legacy one is kit-converted first) or an archetype
+                                             sketch (arthropod.spider, arthropod.crab: every plan number 0 = form
+                                             default), and its generator <gen-dir>/<Species>.py (default Tools~/
+                                             SpeciesGen) that rebuilds the asset with kityaml - edit, run, check
+  creature_kit.py render <Species> [--phase P,Q] [--out DIR] [--views side,front34,top] [--seconds S]
+                                             the look loop: the skinned mesh at each phase its own brain reaches
+                                             (pose-dump: launch, glide, touchdown, dive, curled, walk ...; every phase
+                                             seen when none named) drawn by Tools~/CreatureLook/render.py into
+                                             <out>/<Species>.png (one row per phase) next to the OBJ files
+  creature_kit.py stats <Species>            gait and stance numbers: speed (m/s, Froude), steps/s, duty, lift / L,
+                                             step time (Froude), bob, rest reach share + IK s / pitch per leg, mesh
+                                             size and build time, tick cost, the phases it reaches, the sweep's verdict
+  creature_kit.py trace <Species> [--phase P] [--part ID] [--out f.csv] [--seconds S]
+                                             the bone trace: a CSV row per tick of its own run (every phase): spine
+                                             bends, the part's bones (position, forward, up, scale, det < 0 mirrored)
+  creature_kit.py yaml-selftest              every asset round-trips through kityaml (load -> dump, and through a
+                                             generated generator) byte for byte
 
 Options (any command):
   --tg <path>       the TerrainGen tree to use (default: the one containing the cwd, else
@@ -33,6 +52,9 @@ import os
 import re
 import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import kityaml  # noqa: E402
 
 HARNESS_REL = os.path.join("Tools~", "CreatureHarness")
 
@@ -157,9 +179,103 @@ def unity_compile(tg):
     return 0
 
 
+# ---------------------------------------------------------------- authoring tools (kit services)
+
+def creatures_dir(tg):
+    return os.path.join(tg, "Config", "Creatures")
+
+
+ARCHETYPES = {
+    # name: (class, the sketch's numbers) - every other plan number 0 = the form's default
+    "arthropod.spider": ("ArthropodPlan", {"form": 0, "bodyLength": 0.41}),   # the tarantula's
+    "arthropod.crab": ("ArthropodPlan", {"form": 1, "bodyLength": 0.31}),     # the stone crab's
+}
+
+
+def archetype_sketch(tg, name, arch):
+    import json
+    cls, sketch = ARCHETYPES[arch]
+    cat = json.load(open(os.path.join(creatures_dir(tg), "catalogue.json"), encoding="utf-8"))
+    part = next((p for p in cat["parts"] if p["name"] == cls), None)
+    if part is None:
+        sys.exit(f"{cls} is not in catalogue.json (catalogue --write?)")
+    data = {}
+    for prm in part["params"]:
+        n, t = prm["name"], prm["type"]
+        if "." in n:
+            continue
+        if n == "id":
+            data[n] = "plan"
+        elif n == "at":
+            data[n] = kityaml.at(0)
+        elif n in sketch:
+            data[n] = sketch[n]
+        elif t.endswith("[]") or t.startswith("List"):
+            data[n] = "[]"
+        elif t == "string":
+            data[n] = ""
+        else:
+            data[n] = 0
+    sp = kityaml.Species(name, scale=1)
+    sp.add_part(cls, data)
+    return sp
+
+
+def cmd_new(tg, a):
+    if len(a.names) != 1 or not a.source:
+        sys.exit("new: <Species> --from <Species|archetype> (archetypes: " + ", ".join(ARCHETYPES) + ")")
+    name, src = a.names[0], a.source
+    path = os.path.join(creatures_dir(tg), name + ".asset")
+    if os.path.exists(path):
+        sys.exit(f"{path} exists")
+    if src in ARCHETYPES:
+        sp = archetype_sketch(tg, name, src)
+        note = f"Scaffolded from the archetype {src} (creature_kit.py new): plan numbers 0 = the form's default."
+    else:
+        sp = kityaml.load(os.path.join(creatures_dir(tg), src + ".asset"))
+        if not sp.kit:
+            # a legacy asset: its kit form first (the harness writes it), then from there
+            rc = run(tg, a.real_unity, ["kit-convert", src, name], a.no_build)
+            if rc != 0:
+                sys.exit(rc)
+            sp = kityaml.load(path)
+            os.remove(path)
+        sp.rename(name)
+        note = f"Scaffolded from {src} (creature_kit.py new)."
+    sp.save(path)
+    gen_dir = a.gen_dir or os.path.join(tg, "Tools~", "SpeciesGen")
+    os.makedirs(gen_dir, exist_ok=True)
+    gen = os.path.join(gen_dir, name + ".py")
+    with open(gen, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(kityaml.to_python(sp, note=note))
+    print(f"wrote {path} (+ .meta)")
+    print(f"wrote {gen}")
+    print(f"next: edit {name}.py, run it (python {name}.py {tg}), creature_kit.py check {name}; then the lab roster (references/lab.md)")
+    return 0
+
+
+def cmd_render(tg, a):
+    if len(a.names) != 1:
+        sys.exit("render: <Species> [--phase P,Q]")
+    name = a.names[0]
+    out = os.path.abspath(a.out or os.path.join(os.getcwd(), "look"))
+    os.makedirs(out, exist_ok=True)
+    for f in glob.glob(os.path.join(out, name + "_*.obj")):
+        os.remove(f)
+    args = ["pose-dump", name, "--out", out] + (["--phase", a.phase] if a.phase else []) + (["--seconds", a.seconds] if a.seconds else [])
+    rc = run(tg, a.real_unity, args, a.no_build)
+    objs = sorted(glob.glob(os.path.join(out, name + "_*.obj")))
+    if not objs:
+        return rc or 1
+    renderer = os.path.join(tg, "Tools~", "CreatureLook", "render.py")
+    png = os.path.join(out, name + ".png")
+    return subprocess.call([sys.executable, renderer] + objs + ["--out", png, "--views", a.views])
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["check", "test", "list", "species", "catalogue", "kit-convert", "unity-compile"])
+    ap.add_argument("command", choices=["check", "test", "list", "species", "catalogue", "kit-convert", "unity-compile",
+                                        "new", "render", "stats", "trace", "yaml-selftest"])
     ap.add_argument("names", nargs="*")
     ap.add_argument("--tg")
     ap.add_argument("--real-unity", action="store_true")
@@ -167,10 +283,36 @@ def main():
     ap.add_argument("-v", action="store_true")
     ap.add_argument("--exclude-category", action="append", default=[])
     ap.add_argument("--write", action="store_true", help="catalogue: regenerate the files")
+    ap.add_argument("--from", dest="source", help="new: the species or archetype to start from")
+    ap.add_argument("--gen-dir", help="new: where the generator goes (default <tg>/Tools~/SpeciesGen)")
+    ap.add_argument("--phase", help="render: phases, comma list; trace: a label substring")
+    ap.add_argument("--part", help="trace: the part whose bones to trace")
+    ap.add_argument("--out", help="render: output folder; trace: the CSV")
+    ap.add_argument("--seconds", help="render / trace: run length (x sqrt s; default the sweep's adaptive run)")
+    ap.add_argument("--views", default="side,front34,top", help="render: views (side, front, front34, top, rear34, hero, ...)")
     a = ap.parse_args()
     tg = find_tg(a.tg)
     if a.command == "unity-compile":
         sys.exit(unity_compile(tg))
+    if a.command == "yaml-selftest":
+        probs = kityaml.selftest(creatures_dir(tg))
+        for p in probs:
+            print(p)
+        print("OK: every asset round-trips" if not probs else f"{len(probs)} problem(s)")
+        sys.exit(1 if probs else 0)
+    if a.command == "new":
+        sys.exit(cmd_new(tg, a))
+    if a.command == "render":
+        sys.exit(cmd_render(tg, a))
+    if a.command in ("stats", "trace"):
+        if len(a.names) != 1:
+            sys.exit(f"{a.command}: name one species")
+        args = [a.command, a.names[0]]
+        if a.command == "trace":
+            for flag, v in (("--phase", a.phase), ("--part", a.part), ("--out", a.out), ("--seconds", a.seconds)):
+                if v:
+                    args += [flag, os.path.abspath(v) if flag == "--out" else v]
+        sys.exit(run(tg, a.real_unity, args, a.no_build))
     extra = (["-v"] if a.v else []) + sum((["--exclude-category", c] for c in a.exclude_category), [])
     if a.command == "species":
         sys.exit(run(tg, a.real_unity, ["species"], a.no_build))
