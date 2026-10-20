@@ -46,9 +46,9 @@ python .claude/skills/creature-kit/scripts/creature_kit.py unity-compile      # 
 python .claude/skills/creature-kit/scripts/creature_kit.py catalogue --write  # regenerate CATALOGUE.md + catalogue.json
 python .claude/skills/creature-kit/scripts/creature_kit.py kit-convert DesertSnake KitSnake   # legacy -> kit asset
 python .claude/skills/creature-kit/scripts/creature_kit.py new StoneCrab --from arthropod.crab   # or --from <Species>
-python .claude/skills/creature-kit/scripts/creature_kit.py render Apex --phase launch,glide,touchdown   # the look loop
+python .claude/skills/creature-kit/scripts/creature_kit.py render Pterodactyl --phase launch,glide,touchdown   # the look loop
 python .claude/skills/creature-kit/scripts/creature_kit.py stats Tarantula     # gait / stance / cost numbers
-python .claude/skills/creature-kit/scripts/creature_kit.py trace Apex --phase touchdown --part neck   # bone trace CSV
+python .claude/skills/creature-kit/scripts/creature_kit.py trace Pterodactyl --phase touchdown --part neck   # bone trace CSV
 ```
 
 Kit services (2026-10-20, feat/kit-services; `references/testing.md`, `references/authoring.md`): checks 13 **PoseSweep**

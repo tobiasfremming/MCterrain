@@ -64,10 +64,10 @@ Tuck's curl is exempt). MaxBend's message names the part (`KitPoseSweep.BonePart
   `PhaseRequired` marks what the sweep must reach) and gets the sweep for free.
 - Reports: `inverted: flight=launch t=17.43 s: triangle 17608 of wing.R bone 4 (bones 49/49) at (...) (...) (...)`.
   The full list per phase: `creature_kit.py stats <Species>` (last lines) or `KitPoseSweep.Run(..., stopAtFirst: false)`.
-- First-run findings (2026-10-20, kKnown): Apex (launch: wing bone mirrored), Delver (dive / lunge / rise: neck blend),
+- First-run findings (2026-10-20, kKnown): a sail-wing flyer (launch: wing bone mirrored, fixed by fanRearRollsWithFan), Delver (dive / lunge / rise: neck blend),
   Hexadrake (launch elbow, shoulder triangle in every flight phase, 64 deg kink), KomodoDragon (tongue fork sliver),
   SkyDragon (shoulder blends in launch / beat / flare, touchdown), WingedSerpent (shoulder blend, touchdown 75 deg kink);
-  drawn feet: Apex and WingedSerpent thumb claws skate 3-4 %; groups: RockCrab, Delver, ShaggyMonitor members touch
+  drawn feet: thumb claws on the sail-wing flyer and WingedSerpent skated 3-4 %; groups: RockCrab, Delver, ShaggyMonitor members touch
   (walking brains have no separation - `KitGroup` + `Separation` are the fix's service).
 
 RED proofs (kit services): the manta's body mirrored only while gliding is reported with `soar=glide` and a part
