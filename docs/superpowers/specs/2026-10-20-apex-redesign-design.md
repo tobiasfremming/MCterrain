@@ -38,7 +38,7 @@ tail tip**: the trunk thins into the neck and the neck into the head without a b
 | **Throat flap** | Very large: the **whole underside from the jaw back to the chest is one broad, pale sail**, deep, with a nearly straight, sharpish lower edge running from under the jaw down and back to the chest, and a **soft rounded rim** along that edge. Faint lengthwise creases. | "skin flap … or a skin bag like a pelican, but a bit sharp, soft edge along the entire thing" |
 | **Breathing holes** | A row of **five or six dark pits** with pale rims, on the upper part of the flap / side of the throat, in the front third of the neck, running along the neck. | "breathing holes high on the underside of the neck" |
 | **Flap motion** | The flap has **its own small chain connected to the body chain** so it swings a little. | "maybe this flap should have its own chain that is connected to the main body chain" |
-| **Head** | Long, tapering, **beaked serpent's head**: dark maroon top, pale underside, pointed beak. Fine **ribbed grooves along the mouth line** (lamellae). On top of the upper beak near its tip, **two teal crests that rise and curl backward like hooks or a breaking wave**, the rear one larger. The transition from neck to head is seamless. This is the showpiece. | "almost like a beaked serpent's head, with 2 large protrusions on the upper beak, which makes it look really cool"; "make the head really nice" |
+| **Head** | Long, tapering, **beaked serpent's head**: dark maroon top, pale underside, pointed beak. Fine **ribbed grooves along the mouth line** (lamellae). On top of the upper beak near its tip, **two equal teal crests side by side, splaying apart in opposite directions (left and right): seen from the front their cross-section is a "V"**; each curls back a little like a hook. In the side view they overlap (user correction 2026-10-20). The transition from neck to head is seamless. This is the showpiece. | "almost like a beaked serpent's head, with 2 large protrusions on the upper beak, which makes it look really cool"; "make the head really nice" |
 | **Tail** | **Very long and large**, teal with darker stripes like the wings, a **broad flat ribbon** flattened side to side (cross-section a rounded "\|"). Even standing, it leaves the hips low and then rises in a **big loop** behind the body. | "very long and quite large … cross-section would look like a rounded \|" |
 | **Hind legs** | One pair, slim, dark maroon-brown, dragon-like (digitigrade), clawed feet, under the rear of the trunk. | "dragon like legs" |
 
@@ -185,8 +185,9 @@ swings (measurable lag after a neck move), settles without jitter, never enters 
 The showpiece; look at the head crop. Built from SDF solids (`SculptMesher` is shared infrastructure), rigid to the
 body's head joints. A long, tapering, slightly flattened serpent skull flowing into a pointed beak; small eyes set
 back under a soft brow; dark top, pale underside and lower jaw; a closed mouth line along the side with **fine ribbed
-grooves** (lamellae). **Two crests on top of the upper beak near its tip**, rising and **curling backward like hooks
-or a breaking wave**, the rear one larger, bright teal keratin, clearly visible in the side silhouette. The head's
+grooves** (lamellae). **Two equal crests on top of the upper beak near its tip, a mirrored pair side by side, splaying
+apart left and right so that seen from the front they form a "V"**, each curling back a little, bright teal keratin,
+clearly visible in the side and front silhouettes (user correction 2026-10-20: same size, opposite directions). The head's
 back end overlaps the body's front rings so neck and head flow together. Jaw on its own bone (closed at rest, opens on
 calls / strikes). Parametric: skull length/width/depth, beak length and hook, crest count, positions, heights, curl
 and thickness, groove count and depth. Tests: closed solids, crests in the silhouette and above the beak line, jaw
@@ -250,8 +251,7 @@ it). Every other species bit-identical.
   catalogue fresh.
 - Shape tests that pin the reference's key reads: folded blade tip above the hump and behind the shoulder, blade broad;
   hump is the trunk's highest dorsal point and sharp; keel below and ahead of the chest; neck raised with the head
-  highest; no outline step between neck and head; tail section height/width >= 3 on its middle; crests in the head's
-  silhouette, curling back; dewlap below the neck and never inside it; the bob targets above.
+  highest; no outline step between neck and head; tail section height/width >= 3 on its middle; crests a mirrored equal pair splaying into a V (front view); dewlap below the neck and never inside it; the bob targets above.
 - A side-view offline render of the ground pose placed next to the reference image as a silhouette sanity check
   (not a look-tuning loop).
 - Hand-off note: the aviary, play-mode setup, what to look at per part (blade height and softness, hump, keel, the
