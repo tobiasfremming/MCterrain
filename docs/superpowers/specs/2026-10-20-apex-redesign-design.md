@@ -291,3 +291,19 @@ order of work (deletion first, species last).
   >= 6 % of the body length (twice the serpent-like target in §5), still travelling down the body with the head steadier.
 - **Integration:** at the end, merge `feat/apex-v3` into `feat/creature-integration` **locally** (no push). Rebuilding
   the Creature Lab (and committing `CreatureLab.unity`) is approved.
+
+### 11b. The anatomy reference (user, 2026-10-20: "his anatomy without skin")
+
+`docs/superpowers/specs/assets/2026-10-20-apex-anatomy.jpg` (+ `…-anatomy-head.png`). The same animal with the skin and
+the wing sheets removed. What it settles (the skinned pictures still lead the look):
+- **Forelimbs = the wing arms:** a short upper arm from the shoulder, the elbow close to the flank, and a **very long
+  forearm** reaching the ground (about the shoulder's height); the hand ends in a **large hooked claw curling forward**
+  that touches the ground. In the skinned animal the wing sheet rolls round this end, hiding the claw in the fleshy club
+  (§11) — a hint of the claw's hook may show at the club's tip.
+- **Hind legs:** long, digitigrade, raised hock, long metatarsus, spread toes with curved talons (as DrakeLeg).
+- **Head:** a huge mouth; open, it shows many teeth along both jaws and small fangs at the lower jaw's tip. The two
+  crests are **prongs forking up from the end of the upper beak** in a V, each ending in a flared, curved blade,
+  serrated on its inner edge. Confirms the crests are large (1.5x Task 4b) and equal.
+- **Neck:** long and thick with muscle, continuous with the trunk; five breathing holes in a row on its side, the throat
+  sail's base fans out under it.
+- **Back:** a sharp dorsal ridge over the shoulders (the hump), the long thick-based, side-flattened tail.
