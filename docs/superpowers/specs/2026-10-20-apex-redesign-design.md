@@ -307,3 +307,6 @@ the wing sheets removed. What it settles (the skinned pictures still lead the lo
 - **Neck:** long and thick with muscle, continuous with the trunk; five breathing holes in a row on its side, the throat
   sail's base fans out under it.
 - **Back:** a sharp dorsal ridge over the shoulders (the hump), the long thick-based, side-flattened tail.
+- **Jaw (user note, optional):** the open mouth in the anatomy picture is a snake-like unhinging — parts of the jaw
+  detach and spread, which is why the mouth looks so big. Not required; a nice-to-have for the head follow-up (a wide
+  call gape whose lower jaw halves spread apart). The resting look is the slightly open, toothed mouth of §11.
