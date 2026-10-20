@@ -43,11 +43,59 @@ One fixture per asset in `Config/Creatures` (`[TestFixtureSource]`; discovery th
 | 10 | `Gc` | brain + tick + bones allocate 0 after warm-up (positive control first) |
 | 11 | `Perf` | `[Category("Perf")]` median tick + bones <= `PerfBudgetMs` (legacy default 0.1 ms) |
 | 12 | `Lab` | habitat from the data (Plain, Climbable, Aviary, Grove); the enclosure's safe disc >= half a body length, or `FlightBrain.FitsAviary` |
+| 13 | `PoseSweep` | the mesh skinned through **every phase** its own brain and modules reach (`CreatureKitPoseSweep.cs`): no inverted triangle, no vertex normal flipped against its triangle or pinched (< 0.2) where the bind was clean, no spine kink (> limit + 45 deg); every required phase reached |
+| 14 | `Group` | a roster group (`count` > 1), spawned as the lab does (`LabGroup`), own brains, 3 min: no two members' fitted capsules (`BoneCapsules`) overlap while in sight (`CreatureKitGroupCheck.cs`) |
+
+`Gait` (8) also checks the **drawn** feet (kit services): each planted walking leg's drawn tip - the rest foot carried by
+the leg's last bone; a wing-walking arm's thumb claw (`CreatureWings.ThumbTip`) - drifts < 1 % of the leg's length from
+its sim foot over a plant (a part that re-poses leg bones after CreatureLegs could otherwise slide in the picture; a
+Tuck's curl is exempt). MaxBend's message names the part (`KitPoseSweep.BonePart`) and the vertex positions.
+
+### The pose sweep (check 13)
+
+- Driver: `KitPoseSweep.Run(sp, scale, seed)` - its lab area (aviary for a flyer), `BrainFactory` (the species' own
+  behaviours: FlightBrain, a ModularBrain with SkyHunt / Burrow / School ...), 1/60 s ticks; samples at 10 Hz and every
+  frame for 0.6 s (x sqrt s) after a phase change. Adaptive length: >= 90 s, until every required phase is seen + 30 s,
+  at most 360 s (Froude seconds).
+- Phases: `CreatureKit.PosePhases` (Kit/Services) - channels over the shipped systems (flight: wing-walk, launch, beat,
+  glide, flare, touchdown; soar: beat, glide (+barrel, loop); hunt: stoop, pull-up; burrow: dig-in, dive, under, rise
+  (+to-hole, lunge); tuck: curling, curled, uncurling (+peeking); display: rearing, display; stumble; labels only:
+  tongue, jaw, tendril). **A new system with phases implements `IPosePhases`** (runtime, locomotion mode or behaviour;
+  `PhaseRequired` marks what the sweep must reach) and gets the sweep for free.
+- Reports: `inverted: flight=launch t=17.43 s: triangle 17608 of wing.R bone 4 (bones 49/49) at (...) (...) (...)`.
+  The full list per phase: `creature_kit.py stats <Species>` (last lines) or `KitPoseSweep.Run(..., stopAtFirst: false)`.
+- First-run findings (2026-10-20, kKnown): Apex (launch: wing bone mirrored), Delver (dive / lunge / rise: neck blend),
+  Hexadrake (launch elbow, shoulder triangle in every flight phase, 64 deg kink), KomodoDragon (tongue fork sliver),
+  SkyDragon (shoulder blends in launch / beat / flare, touchdown), WingedSerpent (shoulder blend, touchdown 75 deg kink);
+  drawn feet: Apex and WingedSerpent thumb claws skate 3-4 %; groups: RockCrab, Delver, ShaggyMonitor members touch
+  (walking brains have no separation - `KitGroup` + `Separation` are the fix's service).
+
+RED proofs (kit services): the manta's body mirrored only while gliding is reported with `soar=glide` and a part
+(MaxBend never flies); a 5 s Hexadrake run reports the phases it never reached; the strider's unpinned tips fail the
+drawn-feet rule; five crabs steered into one point touch.
+
+### Material slots (kit services)
+
+`CreatureMaterialSlotsTests`: every shipped species keeps the legacy ids (no named kind, table = registry + Layers rows
+by part id, every part id its mesh emits counted as used); a species-local kind takes the lowest free kit slot and its
+vertices and Layers row use it (KitMonitor + a test patch: slot 10); too many kinds is reported. Kit `Validate` (check
+1) also asserts `MaterialSlots.For(sp).Problem` is null.
+
+### Debugging tools (offline)
+
+- `creature_kit.py stats <Species>`: speed (m/s, Froude), steps/s, duty, lift / L and step time (Froude) per leg, rest
+  reach share and IK s / pitch, bob, mesh size and build time, tick cost, the phases it reaches, the sweep's verdict.
+- `creature_kit.py trace <Species> [--phase touchdown] [--part neck] [--out f.csv]`: the bone trace - a CSV row per
+  tick of its own run: spine bends, the part's bones (position, forward, up, scale, det < 0 = mirrored). Replaces the
+  hand-written joint dumps.
+- `creature_kit.py render <Species> [--phase launch,glide] [--out DIR]`: pose-dump (OBJ per phase, colours from the
+  species' look and Layers) + `Tools~/CreatureLook/render.py` (painter, back-face culling, ground). Replaces the scratch
+  render2.py / PoseDump.cs copies.
 
 RED proofs (`CreatureKitRedTests`): safe radius 0 trips the travel guard; a 1.0x individual claimed as
 1.1x fails Size (ratio 0.954); an allocating tick counts 12000; an out-of-range skin index is reported.
 
-Skips (`CreatureKitAssets.SkipReason`): cephalopod - checks 5-11 (OctopusCreature is not a CreatureSim;
+Skips (`CreatureKitAssets.SkipReason`): cephalopod - checks 5-11, 13, 14 (OctopusCreature is not a CreatureSim;
 its own Octopus*Tests until T1.2/T3.3); legless - Gait.
 
 ### Findings and known offline results (2026-10-18)
@@ -59,6 +107,25 @@ its own Octopus*Tests until T1.2/T3.3); legless - Gait.
 | `CreatureKitTests(WingedSerpent).Size` | offline only | stop-go chaos: 6 % apart offline, PASSES in Unity (2026-10-18) |
 | `CreatureKitTests(DesertMonitor).MaxBend`, `CreatureMonitorTests.Monitor_MaxBend_NoInvertedTriangles`, `CreatureMonitorTests.Monitor_TightTurn_LegsClearTheTrunk` | offline only | near-zero triangle / wander drift offline; all PASS in Unity (2026-10-18) |
 | `CreatureKitTests(TreeOctopus).MeshTime` | watch | 5.9 and 8.4 ms vs the 5 ms limit in two Unity runs on a busy machine; recheck on a quiet one (Tarantula MeshTime/Perf failed once under load, passed on rerun) |
+
+Archetype classes (offline, 2026-10-20, feat/arthropod-archetype): `CreatureArchetypeTests` (spider form = Tarantula
+parity incl. rest stance s/pitch and gait numbers; every form's legs stand in their rest shape; override by id and
+`.L`/`.R`; legPairs 1/6, bad formula, posture bounds, short legs = compose errors; generated Tuck last; the shipped
+crabs come from the plan, stand unbent, walk sideways; the stone crab compact and its tuck derived),
+`CreatureSidewaysTests` (travel along the lateral axis at 0.9/1/1.1x, RED forward travel, the kit gait check, side
+flips without foot slides, turn about the middle, forward shuffle at the forward factor, containment 0.9x/1.1x,
+Froude size, rigid body required). `CreatureTuckTests`: a limb root that plugs in under the shell (a crab's basis, a
+cheliped's merus) may sink no deeper than it sits standing (+2 mm); free segments keep the 1.2 cm bound.
+
+Phase 5 classes (offline, 2026-10-19): `CreatureWaveGaitTests` (lift-off order 100 %, duty factor 1 - 1/G at
+0.9/1/1.1x, never two neighbouring feet of a side in the air, RED event-driven 19 %), `CreatureHexadrakeTests`
+(Folded compose, never plants, no membrane flips + steady folded fingers, flies/lands/folds again, RED),
+`CreatureTendrilTests` (socket, drawn stretch, touch/hold/let go, settled hold still, Froude, no inverted tube,
+RED), `CreatureTuckTests` (RockCrab: Tuck + EyeStalk + the sim's posture inputs - tucked and asleep within
+curlSeconds + 0.2 s, 0 change per frame tucked, nothing out of the shell at 0.9x/1.1x, no inverted triangle through a
+whole cycle, uncurl walks on, Froude frames equal, random scares staggered, no GC; RED walking moves / standing pokes
+out). Perf (.NET): RockCrab 21 us walking (tucked: asleep, less), GiantCentipede 46-48 us (42 arthropod legs; Mono may approach the 0.1 ms default),
+TentacleCrab 34-41 us, Hexadrake 17-20 us.
 
 Unity 2026-10-18: CreatureKitTests 108 run (incl. the Perf cases, which cannot be excluded by group filter), CreatureKitRedTests 4/4, CreatureMonitorTests 12/12.
 
