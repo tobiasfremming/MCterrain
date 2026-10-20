@@ -7,12 +7,13 @@
 
 | | |
 |---|---|
-| `unityMCP` | HTTP, `http://localhost:8080/mcp`. Started by the Editor, not by Claude. |
+| `unityMCP` | HTTP, `http://localhost:8040/mcp`. Started by the Editor, not by Claude. |
 | `blender` | stdio, `uvx blender-mcp`. Needs the BlenderMCP panel connected. |
 
-**Port 8080 is deliberate, not a default.** The `spaceGame/SpaceGame` project
-also runs an MCP-for-Unity server, and it does NOT reliably stay on 8080 — it
-has taken 8081 before. Both Editors are often open at once, and a server on a
+**Port 8040 is deliberate, not a default.** The `spaceGame/SpaceGame` project
+also runs an MCP-for-Unity server and does NOT reliably stay put — it has
+taken 8080 and 8081 (on 2026-09-17 it held 8080, which is why this project
+moved to 8040). Both Editors are often open at once, and a server on a
 port this project also uses answers with *that* project's scene: the failure
 looks like a stale domain, not a misconfiguration.
 
