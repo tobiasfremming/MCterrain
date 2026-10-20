@@ -275,3 +275,19 @@ order of work (deletion first, species last).
 - **Tail overlay vs bounds**: the looping, twisting tail must stay inside the renderer's culling bounds (check 6).
 - **Perf**: more parts and a dewlap chain; stay inside the per-species budget (`PerfBudgetMs`), mesh build < 5 ms
   (SDF head: use the mesher's cache).
+
+## 11. Additions, 2026-10-20 (user, with a higher-resolution reference)
+
+**Best reference now:** `docs/superpowers/specs/assets/2026-10-20-apex-reference-hires.jpg` (736x600), crops
+`…-hires-head.png` and `…-hires-wingend.png`. It leads over the small screenshot.
+
+- **Mouth (supersedes my "closed at rest" call):** the mouth hangs slightly open at rest, showing rows of small teeth
+  along the upper and lower jaw (the "lamellae" are teeth). Rest gape a few degrees; calls open it wider.
+- **Crests:** the V-shaped mirrored pair, **1.5x larger** than the Task 4b default (user agreed).
+- **Folded wing's ground end:** a thick, fleshy club where the wing sheet rolls and wraps around the forearm's end
+  (a rounded, rolled end — no claw), stripes running along the whole blade.
+- **Throat sail:** very deep (deeper than the neck), five pits on its upper part near the jaw end.
+- **Bob:** the Apex bobs **way more** than the Winged Serpent because it is heavier: girdle bob peak-to-peak
+  >= 6 % of the body length (twice the serpent-like target in §5), still travelling down the body with the head steadier.
+- **Integration:** at the end, merge `feat/apex-v3` into `feat/creature-integration` **locally** (no push). Rebuilding
+  the Creature Lab (and committing `CreatureLab.unity`) is approved.
