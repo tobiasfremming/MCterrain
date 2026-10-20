@@ -310,3 +310,15 @@ the wing sheets removed. What it settles (the skinned pictures still lead the lo
 - **Jaw (user note, optional):** the open mouth in the anatomy picture is a snake-like unhinging — parts of the jaw
   detach and spread, which is why the mouth looks so big. Not required; a nice-to-have for the head follow-up (a wide
   call gape whose lower jaw halves spread apart). The resting look is the slightly open, toothed mouth of §11.
+
+### 11c. Face close-ups (user, 2026-10-20): `assets/2026-10-20-apex-face-closed-open.png` (left closed, right open)
+The best head reference; it leads for the head.
+- **Closed:** a long beak; a row of interlocking teeth shows along the whole lip line even with the mouth shut (a toothy
+  grin). The mouth line runs far back, under and past the eye. A small rounded knob under the tip of the lower jaw.
+- **Crests:** two equal curved blades at the end of the upper beak, splaying apart (the V), each a sickle curving up and
+  back with pale lengthwise streaks; in a 3/4 view one seems to lean back, the other forward. (Colour stays the main
+  image's bright teal.)
+- **Open:** the upper beak with its crests tips up a little, the lower jaw drops wide (~60-70 deg), the gape reaches far
+  back into the throat; the inside is pink-red with rows of teeth on both jaws and small fangs at the lower jaw's tip.
+- **Breathing holes:** five oblique slit-pits on the pale throat, **growing toward the head** (the front one largest).
+- Throat pale with fine lengthwise striations.
