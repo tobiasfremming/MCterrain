@@ -114,6 +114,22 @@ vertices and Layers row use it (KitMonitor + a test patch: slot 10); too many ki
   invert at launch tick 5; SkyDragon's twist chain 15-574). Needs its own look before turning the flag on. User wants a reminder.
 - Unity still owes: `CreatureKitTests(Apex)`, `CreatureApexTests`, `CreatureDewlapTests` (long chaotic runs; Mono floats may diverge).
 
+### Pops: per-tick jumps (Vesper task D, feat/vesper, 2026-10-21)
+
+Measure the largest per-tick step of the head and the girdle (ticks inside one mode, and through each transition): a pop
+is a step many times the girdle's. Two opt-in `FlightSpec` flags (off = shipped flyers bit-identical; on for Vesper):
+- `headStabiliseBounded`: the AirChain head stabiliser filters only the vertical bob over `headStabilise`, turns and the
+  trunk's lead direction over 0.15 s, its smoothed girdle within 0.25 neck lengths, the target within 40 deg of the trunk.
+  Off, `smoothPos` trails a turn by ~v x tau (14 m on Vesper's 4.4 m neck at headStabilise 1.2; 8.9 m on the Apex at 0.6)
+  and `Contain()` cuts the outward velocity (the trunk's leader turned 62 deg in a tick): the bend-limited neck flips.
+  Vesper 7.45 -> 0.48 m (girdle 0.13); **shipped flyers have it too (flag off)**: Apex 4.3 m, Hexadrake / WingedSerpent
+  0.7 m on a 0.5 m neck; Pterodactyl and SkyDragon (twist) clean. Lowering headStabilise alone does not fix it (0.15: 2.5 m).
+- `touchdownFromHover`: `BeginTouchdown` on a tick's last sub-step showed the walking restart's laid body (perch: girdle on
+  the point; touchdownAtStance: the stance) for one tick, the blend carried it back the next. Rock perch girdle 2.9 m /
+  1.6 m -> 0.33 / 0.41 m, open-ground head 2.4 m -> 0.15 m. Affects every perching flyer and the Apex (flag off).
+- Still open: on a rock perch the draped tail tip swings up to 7 m in one tick late in the touchdown (Drape over the edge).
+Tests: `CreatureVesperTests.Vesper_Flight_NoHeadJump`, `Vesper_Touchdown_NoGirdleJump` (+ REDs).
+
 ### Debugging tools (offline)
 
 - `creature_kit.py stats <Species>`: speed (m/s, Froude), steps/s, duty, lift / L and step time (Froude) per leg, rest

@@ -62,7 +62,8 @@ Apex redesign (2026-10-21, `feat/apex-v3`, spec `docs/superpowers/specs/2026-10-
 **PitRow**, **Dewlap**, **DrakeLeg**, **FleshWing**, **TailFlourish**. Four opt-in `FlightSpec` flags (off = shipped flyers
 bit-identical): `airNeckStance`, `launchHeadOnNeck`, `touchdownAtStance`, `launchTailBySegment`; plus
 `CreatureSpecies.restAtSpacing` (set by `FlowBody.restAtStance`) for a bind that keeps a raised neck's stance. Generator:
-`Tools~/SpeciesGen/Apex.py`. Lessons: `references/testing.md` ("Apex redesign lessons").
+`Tools~/SpeciesGen/Apex.py`. Lessons: `references/testing.md` ("Apex redesign lessons"). Two more opt-in flags against
+pops (Vesper, 2026-10-21; `references/testing.md` "Pops"): `headStabiliseBounded`, `touchdownFromHover`.
 
 Offline is not Unity: .NET MathF rounds differently from Mono, so goldens differ per runtime and long or
 chaotic runs can drift. Known cases are listed in the harness (`kKnown` in `Program.cs`, "offline" vs
