@@ -46,9 +46,9 @@ python .claude/skills/creature-kit/scripts/creature_kit.py unity-compile      # 
 python .claude/skills/creature-kit/scripts/creature_kit.py catalogue --write  # regenerate CATALOGUE.md + catalogue.json
 python .claude/skills/creature-kit/scripts/creature_kit.py kit-convert DesertSnake KitSnake   # legacy -> kit asset
 python .claude/skills/creature-kit/scripts/creature_kit.py new StoneCrab --from arthropod.crab   # or --from <Species>
-python .claude/skills/creature-kit/scripts/creature_kit.py render Pterodactyl --phase launch,glide,touchdown   # the look loop
+python .claude/skills/creature-kit/scripts/creature_kit.py render Apex --phase wing-walk,beat,glide   # the look loop
 python .claude/skills/creature-kit/scripts/creature_kit.py stats Tarantula     # gait / stance / cost numbers
-python .claude/skills/creature-kit/scripts/creature_kit.py trace Pterodactyl --phase touchdown --part neck   # bone trace CSV
+python .claude/skills/creature-kit/scripts/creature_kit.py trace Apex --phase touchdown --part neck   # bone trace CSV
 ```
 
 Kit services (2026-10-20, feat/kit-services; `references/testing.md`, `references/authoring.md`): checks 13 **PoseSweep**
@@ -56,6 +56,13 @@ Kit services (2026-10-20, feat/kit-services; `references/testing.md`, `reference
 wing-walk, burrow, tuck, display - inverted triangles, flipped normals, kinks, with phase, part and position) and 14
 **Group** (a roster group of `count` never touches, capsules fitted to the real mesh); `Gait` also checks the drawn feet.
 One YAML library for generators: `scripts/kityaml.py` (never copy a writer again). Groups: `KitGroup` / `Separation`.
+
+Apex redesign (2026-10-21, `feat/apex-v3`, spec `docs/superpowers/specs/2026-10-20-apex-redesign-design.md`): seven new parts, recipe in
+`references/authoring.md` ("Apex parts recipe"): **FlowBody** (one drawn-surface chain, head to tail tip), **CrestBeakHead**,
+**PitRow**, **Dewlap**, **DrakeLeg**, **FleshWing**, **TailFlourish**. Four opt-in `FlightSpec` flags (off = shipped flyers
+bit-identical): `airNeckStance`, `launchHeadOnNeck`, `touchdownAtStance`, `launchTailBySegment`; plus
+`CreatureSpecies.restAtSpacing` (set by `FlowBody.restAtStance`) for a bind that keeps a raised neck's stance. Generator:
+`Tools~/SpeciesGen/Apex.py`. Lessons: `references/testing.md` ("Apex redesign lessons").
 
 Offline is not Unity: .NET MathF rounds differently from Mono, so goldens differ per runtime and long or
 chaotic runs can drift. Known cases are listed in the harness (`kKnown` in `Program.cs`, "offline" vs

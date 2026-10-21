@@ -81,6 +81,39 @@ by part id, every part id its mesh emits counted as used); a species-local kind 
 vertices and Layers row use it (KitMonitor + a test patch: slot 10); too many kinds is reported. Kit `Validate` (check
 1) also asserts `MaterialSlots.For(sp).Problem` is null.
 
+### Apex redesign lessons (feat/apex-v3, 2026-10-21)
+
+- **One bind source: `CreatureRestPose.BindSim(sp, wings)`.** The rest sim with `StraightenBind` for a tall-stance winged
+  species. `PartMeshEmitter.Rest`, `BoneWorld`, `WingedMeshBuilder.RestBoneWorld` and surface parts (Dewlap via
+  `PartMeshEmitter.ForBind`) all use it; a part building rest geometry from `CreatureRestPose.Sim` drifts off the drawn body
+  (`Red_Dewlap_PlainRestGeometry`). A `restAtSpacing` species (FlowBody `restAtStance`) is not straightened; its rib rest
+  lengths come from `CreatureSim.RestRun`.
+- **`RestMeshCache`** (`Kit/Services`): surface parts record the rest mesh they emit and replay it when the data is the same.
+  Key = `RestMeshCache.MixData(part)` (reflection over serialized data, plus the body for PitRow/Dewlap, rest joints, bind
+  bones, test hooks): a new serialized field needs no key edit, a non-serialized input does. Cap 64 entries, cleared when full.
+  Open: `MixData` type gaps, replay remap untested. RED `Red_OneKey_StaleMesh`.
+- **Steep raised neck + winged body: three flips, four opt-in `FlightSpec` flags** (default off; `FlyModule()` in
+  `CreatureFleshWingTests` sets them; each has a RED with the flag off):
+  - `launchHeadOnNeck`: neck front (joints 0-1) inverted in launch/climb-out (the walking frames put bone 0 level).
+  - `airNeckStance` 0..1: AirChain cones keep that share of the stance bends. 0-0.15 keel seam flips (joints 6-7), 0.95+ the
+    back under the hump flips, 0.2-0.9 clean. Head target stays on the flight line. AirTwist ignores it.
+  - `touchdownAtStance`: a ground landing lays the body at its stance (+ `CreatureLegs.HoldDroop`); else a 28-56 deg chest kink.
+  - `launchTailBySegment`: a launch from standing or a circling walk lerped two far-apart tail curves, `Relength` then folded
+    the tail 90-178 deg (hundreds of inverted triangles, ~0.4 s). Segments are now slerped, held in `AirChain.ConeAt`, tail
+    bones get transported frames. Side effect: a walking tail already over its limit pops ~1 deg at launch tick 1.
+- **A bob needs beats.** `kLift >= 0.3` with `kGrip >= 0.7` settles into a glide (0 beats); `kLift <= 0.2, kGrip 0.4` cannot leave
+  ground effect. Measure girdle p-p, head/girdle ratio and the tail lag (signed per-station lags, each step in (0, 0.45) beat).
+- **Named-kind slots:** `CreatureMaterialSlotsTests.NamedSlotRowProblem` asserts each named slot's row (Layers row, else the kind's
+  default, else legacy); `kNamedKindSpecies` lists species allowed named kinds (Apex).
+- **Look is tested, each with a RED:** closed solids (2 triangles per edge), crest ripple/outline, `SteepProblem` / `BroadProblem`
+  on the species, `Head_OpenMouth_OnlyMouthInside` (63 rays), `InsideMouthProblem(walkSeconds)` for a walking pose,
+  `Dewlap_HeavyBob_RimNeverTurnsOver`, `Tail_NoKink`. Test hooks: `internal static ...ForTest`, reset in `finally`.
+- **KNOWN FINDING, fix flag exists but is OFF:** `WingedSerpent` (standing launch) and `Hexadrake` (standing and circling) fold
+  their tail on launch (166 deg over the limit; 328 / 587 inverted body triangles). `launchTailBySegment` cleans the body but
+  raises WingedSerpent's limb inversions 46 -> 116 (WingedSerpent part 8 bones 47/48 and Hexadrake part 1 bones 38/39 already
+  invert at launch tick 5; SkyDragon's twist chain 15-574). Needs its own look before turning the flag on. User wants a reminder.
+- Unity still owes: `CreatureKitTests(Apex)`, `CreatureApexTests`, `CreatureDewlapTests` (long chaotic runs; Mono floats may diverge).
+
 ### Debugging tools (offline)
 
 - `creature_kit.py stats <Species>`: speed (m/s, Froude), steps/s, duty, lift / L and step time (Froude) per leg, rest

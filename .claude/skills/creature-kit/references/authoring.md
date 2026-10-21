@@ -104,6 +104,48 @@ Shipped users: `RockCrab` (stone crab: compact, Oval, tuck), `TentacleCrab` (kin
 - Writing kit YAML by hand is error-prone: a small generator (Python emitting the SerializeReference blocks,
   `template: {rid: N}` for a Repeat) keeps tuning sweeps fast; the asset stays the source of truth.
 
+## Apex parts recipe (feat/apex-v3, 2026-10-21)
+
+The Apex (`Tools~/SpeciesGen/Apex.py`, scale 3.5) is built from seven kit parts and nothing legacy. Copy its generator;
+numbers below are at scale 1. Reasons and measurements: `.superpowers/sdd/2026-10-20-apex-redesign/` reports.
+
+| part | use when | proven numbers (Apex) |
+|---|---|---|
+| **FlowBody** | a body drawn as ONE surface: raised neck, hump, keel, ribbon tail (no rings per part) | 26 joints x 0.1; clearances 0.93 / 0.83 / 0.69 / 0.52 at joints 0 / 2.5 / 4.5 / 7; chest key hump 0.06 (sharpness 8), keel 0.08, flank 0.02; tail `blade 1` from joint 12.5; `rigidHeadJoints 2`; `restAtStance 1` |
+| **CrestBeakHead** | a long beaked head with crest pair, teeth, gape, on joint 0 | defaults (skull 0.26 x 0.055 x 0.067, V pair splay 30, sickle `flare` 2.6, teeth 16, fangs 2, rest gape 7, call 62); Apex deepens the jaw: `jawDepth 1.1`, `chinDepth 0.65`, `throatDepth 0.8` |
+| **PitRow** | breathing holes / spiracles on a FlowBody | 5 per side, `fromU 0.08` `toU 0.16`, `angleDeg -35`, slits `aspect 2.2` `slantDeg 50`, growing toward the head |
+| **Dewlap** | a throat sail on its own swinging chain | joints 1..7, 5 stations x 3 links, `depthAt {0.14,0.24,0.28,0.25,0.17}`, `edgeStraightness 0.45`, rest = part defaults (25 deg, damping 0.35, coupling 0.6) |
+| **DrakeLeg** | slim digitigrade hind leg: raised hock, toes, talons | upper 0.24 / lower 0.26, `ankleHeight 0.14`, 3 toes + hallux, `restOffset (0.18,0,-0.1)` |
+| **FleshWing** | thick soft folding wing walked on a club (rides a `Leg2Bone` arm, named by id) | fingers {1.75..0.85}, spread {36..84}, fold {160..168}, `bindFold 0.3`, `spanMaxDeg 20`, `groundLiftDeg 82`; see traps |
+| **TailFlourish** | decorative tail: loop standing, roll + curl in the air; never steers the sim | `fromJoint` = tail root, `groundLoopDeg 12` (13 joints turn >= 141 deg; an 11-segment tail only ~70), air roll 70 / curl 9 |
+
+Wiring:
+- Arm `Leg2Bone` at the shoulder joint, DrakeLeg at the hips; FleshWing `arm` = the arm's id.
+- `Fly` flags, all four (else the steep-neck body flips in flight): `airNeckStance` (0.2-0.9 clean; Apex 0.3),
+  `launchHeadOnNeck`, `touchdownAtStance`, `launchTailBySegment`. Head steadiness: `headStabilise 0.6`.
+- A heavy flyer that must bob: `kLift 0.1`, `kGrip 1`, `demandFloor 0.12`, `glideDemand 0.14`, `airLevel 0.8`,
+  `avoidLookahead 2.4`, `flareDistance 1.6` (girdle 12.9 % of body p-p, head 0.20 x). `kLift 0.75` just glides: 0 beats.
+
+Safe ranges and traps (measured; more in the parts' `[Param]` text):
+- **FleshWing: steep side-by-side blades come from the arm, not a flag.** Arm upper 0.2 / lower 0.5 (upper << lower), wrist
+  `restOffset (0.06,0,-0.22)`, `pole (0.2,1,-0.4)` (`pole.x` 0 drifts the club 10 %). `bindFold` 0.2-0.45 passes the fold
+  sweep (0 and >= 0.6 invert); `spanMaxDeg` 20 (12 saturates, no visible lag). A raised neck pitches the chest up and leans the
+  blades in: raise `groundLiftDeg` (68 -> 82) until the tips stand on their own side and never cross. Test the species with
+  `CreatureFleshWingTests.SteepProblem` / `BroadProblem`.
+- **Dewlap:** `rearSweep` >= ~0.5, `links` <= 3 (0.35 / 4 fold under a heavy bob), `rootThickness` < ~0.02 (wider leaves the
+  throat's quads). The 0.25 rear cap is a small sliver at the chest end.
+- **Stance segments <= ~65 deg** (a walking frame rolls 180 deg past 90; the guard fails at 85). Apex steepest: 47.6.
+- **FlowBody `Section` is the drawn surface, not `halfHeight`** (a blade-0 oval is capped at `ovalMaxAspect` 2). Parts that sit
+  on the body query `Section` / `SurfaceAt`.
+- **Material slots: 6 kit slots (10..15).** Apex named kinds: crest, pit, dewlap, wingfan, wingstripe, mouth. Share with
+  `FlowBody.tailKind` / `dorsalStripeKind` (Apex: both `wingfan`). Teeth: `ivory-teeth` costs a slot; legacy `"teeth"` row 13
+  IS a kit slot (no saving); the Apex uses legacy `"band"` row 9 + a Layers row (fragile: anything else drawing row 9 turns
+  ivory). Talons: Layers row 2.
+- **TailFlourish must be the LAST part** (as Tuck, Burrow: they cannot share a species). Parts reading the tail's `sim.Joints`
+  do not follow the posed tail.
+- **Mesh budget:** the surface parts replay their rest mesh from `RestMeshCache` (testing.md); the Apex builds in ~2 ms offline.
+- Non-default skulls (jawFraction 0.3, bigger) can leave pinched edges: run `Head_Solids_AreClosed`-style checks on yours.
+
 ## Groups (kit services)
 
 A species the lab keeps as a group (roster `count` > 1) gets check 14 (no member touches another). Behaviours that
