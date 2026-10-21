@@ -78,3 +78,23 @@ per-joint spine spacing.
 - [ ] **Step 3: Retune `Vesper.py`** to the spec's table and heights: N = 38 (head 4, neck 7, trunk 6, tail 21); HEAD/neck/trunk/tail `spacing` keys 0.05/0.06/0.1/0.1 (smooth ramp); profile clearances tail tip ~0.08, hips 0.80, hump ~0.92 just behind the shoulders, shoulders 0.85, head ~0.88; DrakeLeg upper 0.28, lower 0.32, ankleHeight 0.30, attach/restOffset so the foot plants under the hip; Leg2Bone upper 0.25, lower ~0.8, restOffset ≈ (0.25, 0, +0.45), pole up and back; FINGER_FOLD / groundLiftDeg rescanned so `Vesper_FoldedWingsStaySeparate` holds (record the scan in the comment as the existing one does); stepThreshold/stepDuration/stepLift raised on both limbs for the stride test; SHOULDER/HIPS/TAIL_ROOT/membrane joints/eye joint re-indexed. Regenerate the asset.
 - [ ] **Step 4: Run** one class at a time: CreatureVesperTests, CreatureCommandBrainTests, CreatureVesperLabTests, CreatureDigitWingTests, CreatureSegmentSpacingTests; `check Vesper` (kit checks: Layout, Gait, Size, Gc, Perf, Lab, Wander). Fix by retuning Vesper.py or flight constants (each with a reason); a shared-code change needs an opt-in flag. All PASS (Mono-margin note: keep ≥ 20 % margin on thresholds).
 - [ ] **Step 5: Commit** `feat(vesper): humpbacked build - high hips, hump, flat neck, closer head/neck joints, long tail, long metatarsus, knuckles forward, longer strides`; then write the look checklist for the user into the task report (what to watch in VesperLab: profile from the side, knuckles ahead of the chest, strides, folded finger blades, flight bob).
+
+### Task 3: Landing flare (wings open wide and pitch up to brake)
+
+**Files:**
+- Modify: `Scripts/Creatures/Flight/WingSpec.cs` or `FlightSpec` (opt-in flag + pose numbers), `Scripts/Creatures/Flight/CreatureWings.cs` (the flare pose and its blend), `Scripts/Creatures/Kit/DigitWing.cs` (fingers fanned/cupped in the flare), `Tools~/SpeciesGen/Vesper.py` (flag on).
+- Test: `Tests/EditMode/CreatureVesperTests.cs`, plus a shipped-flyer golden guard (CreatureFlightGoldenTests unchanged).
+
+**Interfaces:**
+- Consumes: `CreatureFlight.Mode` (`FlightMode.Flare`, `FlightMode.Touchdown`), `ModeTime`; Task 2's Vesper.
+- Produces: `WingSpec.landingFlare` (float 0..1 weight, 0 = off = today's behaviour) and the flare pose numbers the builder picks (spread, sweep-forward, pitch-up in degrees), documented in their `[Param]`s.
+
+- [ ] **Step 1: Write the failing tests** in `CreatureVesperTests`:
+  - `Vesper_LandingFlare_WingsOpenAndPitchUp` — land on open ground (CommandBrain Land, 3 seeds): in the last 0.3 s × √s before touchdown each wing's finger fan (angle between leading and trailing finger roots) ≥ 0.9 × its widest in cruise glide, the wrist ahead of the shoulder along the heading, and the wing chord pitched nose-up ≥ 30° to the flight path.
+  - `Vesper_LandingFlare_NoPop` — through the flare's start, the touchdown and a forced go-around: no finger tip / wrist moves more than its frame's normal maximum in cruise × 1.5 in one tick.
+  - `Vesper_LandingFlare_PerchToo` — the same flare pose on a rock-perch landing (1 seed that perches).
+  - Golden guard: CreatureFlightGoldenTests unchanged with the flag off.
+- [ ] **Step 2: Run** `test CreatureVesperTests` — expected FAIL on the new tests.
+- [ ] **Step 3: Implement** the flare pose in CreatureWings (blended in by Flare mode's ModeTime, out over Touchdown), DigitWing fanning + cupping by the flare weight; Vesper.py `landingFlare: 1`.
+- [ ] **Step 4: Run** one class at a time: CreatureVesperTests, CreatureCommandBrainTests, CreatureDigitWingTests, CreatureFlightGoldenTests; `check Vesper`. All PASS.
+- [ ] **Step 5: Commit** `feat(flight): opt-in landing flare - wings open wide and pitch up to brake (Vesper)`; add the flare to the look checklist.

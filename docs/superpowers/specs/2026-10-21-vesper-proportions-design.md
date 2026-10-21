@@ -68,3 +68,15 @@ Unity; offline: tests + kit checks. Unity MCP port 8040, verify `MarchingCubes@.
 The representation of per-joint spacing (a FlowBody profile channel compiled to per-segment lengths on the species is the
 expected shape), how each consumer reads it, the exact stride numbers, finger fold angles, any flight constant needed to
 keep the tests' margins.
+
+## Addendum: the landing flare (user, 2026-10-21: "make the wings flare when landing")
+
+Today the landing's Flare mode (CreatureFlight) only brakes with slow high-drag strokes; the wings do not *look*
+flared. Wanted: as Vesper comes in to land, the wings open wide and pitch up into an air brake, like a bird or a bat
+landing — fingers fanned to their widest, the wing swept forward and high, the membrane span (the finger chains) cupped
+by the air — held through the last moment before touchdown, then folding onto the walk after the feet are down.
+- Opt-in (a WingSpec/FlightSpec flag, off by default; shipped flyers bit-identical); on for Vesper.
+- Smooth in and out (no pop: the wing blends into the flare over the flare's start and out of it over the touchdown).
+- Works for open-ground and rock-perch landings and for a go-around (the flare abandoned, back to beating).
+- The fingers' air flex reads the flare (they billow/cup harder at the high angle).
+Left to the builder: blend times, the exact pose numbers, whether a last braking beat or a held flare.
