@@ -80,3 +80,17 @@ by the air — held through the last moment before touchdown, then folding onto 
 - Works for open-ground and rock-perch landings and for a go-around (the flare abandoned, back to beating).
 - The fingers' air flex reads the flare (they billow/cup harder at the high angle).
 Left to the builder: blend times, the exact pose numbers, whether a last braking beat or a held flare.
+
+## Anti-goal: NOT a pterosaur (user, 2026-10-21: the first skeleton "kinda reads as a pterodactyl")
+
+The user rejected pterosaur looks twice before (the Apex's earlier versions). Pterosaur cues to avoid, each with what
+Vesper does instead:
+- Shoulders high, back sloping down to low hips, a long upright neck with the head as the peak -> Vesper: high hips, the
+  hump the peak, the neck nearly level, a short head carried forward at about hump height.
+- Tiny or stiff short tail -> a very long, living tail (over half the animal) reaching the ground.
+- One huge wing finger, the other fingers small claws -> four long fingers of graded length spreading the wing between
+  them (bat/manta-like), only the thumb a small claw.
+- Upright, narrow, leggy quadruped stance -> a heavy, broad, low-slung front: knuckles planted forward and out wide, the
+  chest between the arms, elbows up and back.
+- Landing flare: a broad bat/manta-like cupped spread of four fingers, not a pterosaur's single swept spar.
+Every task's look checklist names these; a reviewer who sees a pterosaur cue reintroduced flags it.
